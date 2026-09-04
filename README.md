@@ -12,13 +12,24 @@ assistente e insights automáticos).
 - **IA:** API da Anthropic (Claude)
 - **Infra:** Docker Compose
 
+## Como rodar
+
+1. Copie `.env.example` para `.env` e ajuste os valores se necessário.
+2. Suba tudo com Docker Compose:
+
+```bash
+docker compose up -d --build
+```
+
+3. Backend disponível em `http://localhost:8000` (health-check em `/api/health/`), frontend em `http://localhost:5173`.
+
 ## Status
 
-🚧 Em construção — Fase 0 (fundação).
+🚧 Em construção — Fase 1 (autenticação + CRUD core).
 
 ## Roadmap
 
-- [ ] Fase 0 — Fundação (Docker, scaffolding backend/frontend)
+- [x] Fase 0 — Fundação (Docker, scaffolding backend/frontend)
 - [ ] Fase 1 — Autenticação + CRUD core
 - [ ] Fase 2 — Dashboards analíticos
 - [ ] Fase 3 — Orçamentos e filtros avançados
