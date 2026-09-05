@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'apps.categories',
     'apps.transactions',
     'apps.analytics',
+    'apps.budgets',
 ]
 
 MIDDLEWARE = [

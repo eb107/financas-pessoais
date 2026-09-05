@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { Budgets } from "../pages/Budgets";
 import { Dashboard } from "../pages/Dashboard";
 import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
@@ -25,6 +26,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/budgets"
+          element={
+            <ProtectedRoute>
+              <Budgets />
             </ProtectedRoute>
           }
         />

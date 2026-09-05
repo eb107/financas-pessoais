@@ -1,15 +1,18 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { IconTrash } from "../components/icons";
 import { Layout } from "../components/Layout";
 import { listCategories } from "../features/categories/api";
+import { listTags } from "../features/tags/api";
 import {
   createTransaction,
   deleteTransaction,
   listTransactions,
+  type TransactionFilters,
 } from "../features/transactions/api";
 import { listWallets } from "../features/wallets/api";
 
@@ -29,17 +32,23 @@ const currency = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+const selectClass =
+  "w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60";
+
 export function Transactions() {
   const queryClient = useQueryClient();
+  const [filters, setFilters] = useState<TransactionFilters>({});
+  const [selectedTags, setSelectedTags] = useState<number[]>([]);
 
   const walletsQuery = useQuery({ queryKey: ["wallets"], queryFn: listWallets });
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
     queryFn: listCategories,
   });
+  const tagsQuery = useQuery({ queryKey: ["tags"], queryFn: listTags });
   const transactionsQuery = useQuery({
-    queryKey: ["transactions"],
-    queryFn: listTransactions,
+    queryKey: ["transactions", filters],
+    queryFn: () => listTransactions(filters),
   });
 
   const createMutation = useMutation({
@@ -47,6 +56,7 @@ export function Transactions() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       reset();
+      setSelectedTags([]);
     },
   });
 
@@ -75,12 +85,25 @@ export function Transactions() {
       type: data.type,
       description: data.description ?? "",
       date: data.date,
+      tags: selectedTags,
     });
+  }
+
+  function toggleTag(id: number) {
+    setSelectedTags((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
+    );
+  }
+
+  function updateFilter(key: keyof TransactionFilters, value: string) {
+    setFilters((prev) => ({ ...prev, [key]: value || undefined }));
   }
 
   const wallets = walletsQuery.data ?? [];
   const categories = categoriesQuery.data ?? [];
+  const tags = tagsQuery.data ?? [];
   const transactions = transactionsQuery.data ?? [];
+  const hasActiveFilters = Object.keys(filters).length > 0;
 
   return (
     <Layout>
@@ -94,16 +117,13 @@ export function Transactions() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.24 }}
         onSubmit={handleSubmit(onSubmit)}
-        className="glass mb-8 grid grid-cols-2 gap-3 rounded-2xl p-5 sm:grid-cols-3"
+        className="glass mb-6 grid grid-cols-2 gap-3 rounded-2xl p-5 sm:grid-cols-3"
       >
         <div>
           <label className="mb-1 block text-xs font-medium text-white/50">
             Carteira
           </label>
-          <select
-            {...register("wallet")}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
-          >
+          <select {...register("wallet")} className={selectClass}>
             <option value="" className="bg-surface">
               Selecione
             </option>
@@ -122,10 +142,7 @@ export function Transactions() {
           <label className="mb-1 block text-xs font-medium text-white/50">
             Categoria
           </label>
-          <select
-            {...register("category")}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
-          >
+          <select {...register("category")} className={selectClass}>
             <option value="" className="bg-surface">
               Sem categoria
             </option>
@@ -141,10 +158,7 @@ export function Transactions() {
           <label className="mb-1 block text-xs font-medium text-white/50">
             Tipo
           </label>
-          <select
-            {...register("type")}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
-          >
+          <select {...register("type")} className={selectClass}>
             <option value="expense" className="bg-surface">
               Despesa
             </option>
@@ -192,6 +206,33 @@ export function Transactions() {
           />
         </div>
 
+        {tags.length > 0 && (
+          <div className="col-span-2 sm:col-span-3">
+            <label className="mb-1 block text-xs font-medium text-white/50">
+              Tags
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((t) => {
+                const active = selectedTags.includes(t.id);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => toggleTag(t.id)}
+                    className={`rounded-full px-3 py-1 text-xs transition ${
+                      active
+                        ? "btn-gradient text-black"
+                        : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+                    }`}
+                  >
+                    {t.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="col-span-2 sm:col-span-3">
           <motion.button
             whileTap={{ scale: 0.98 }}
@@ -204,12 +245,124 @@ export function Transactions() {
         </div>
       </motion.form>
 
+      <div className="glass mb-6 flex flex-wrap items-end gap-3 rounded-2xl p-4">
+        <div>
+          <label className="mb-1 block text-xs font-medium text-white/40">
+            Carteira
+          </label>
+          <select
+            value={filters.wallet ?? ""}
+            onChange={(e) => updateFilter("wallet", e.target.value)}
+            className={selectClass}
+          >
+            <option value="" className="bg-surface">
+              Todas
+            </option>
+            {wallets.map((w) => (
+              <option key={w.id} value={w.id} className="bg-surface">
+                {w.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-white/40">
+            Categoria
+          </label>
+          <select
+            value={filters.category ?? ""}
+            onChange={(e) => updateFilter("category", e.target.value)}
+            className={selectClass}
+          >
+            <option value="" className="bg-surface">
+              Todas
+            </option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id} className="bg-surface">
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-white/40">
+            Tipo
+          </label>
+          <select
+            value={filters.type ?? ""}
+            onChange={(e) => updateFilter("type", e.target.value)}
+            className={selectClass}
+          >
+            <option value="" className="bg-surface">
+              Todos
+            </option>
+            <option value="expense" className="bg-surface">
+              Despesa
+            </option>
+            <option value="income" className="bg-surface">
+              Receita
+            </option>
+            <option value="transfer" className="bg-surface">
+              Transferência
+            </option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-white/40">
+            De
+          </label>
+          <input
+            type="date"
+            value={filters.date_from ?? ""}
+            onChange={(e) => updateFilter("date_from", e.target.value)}
+            className={selectClass}
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-white/40">
+            Até
+          </label>
+          <input
+            type="date"
+            value={filters.date_to ?? ""}
+            onChange={(e) => updateFilter("date_to", e.target.value)}
+            className={selectClass}
+          />
+        </div>
+
+        <div className="flex-1 min-w-32">
+          <label className="mb-1 block text-xs font-medium text-white/40">
+            Buscar
+          </label>
+          <input
+            value={filters.search ?? ""}
+            onChange={(e) => updateFilter("search", e.target.value)}
+            placeholder="Descrição..."
+            className={`w-full ${selectClass}`}
+          />
+        </div>
+
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={() => setFilters({})}
+            className="rounded-lg px-3 py-1.5 text-xs text-white/40 hover:text-pink-400"
+          >
+            Limpar filtros
+          </button>
+        )}
+      </div>
+
       {transactionsQuery.isLoading && (
         <p className="text-white/40">Carregando transações...</p>
       )}
 
       {!transactionsQuery.isLoading && transactions.length === 0 && (
-        <p className="text-white/40">Nenhuma transação ainda.</p>
+        <p className="text-white/40">Nenhuma transação encontrada.</p>
       )}
 
       <div className="glass overflow-hidden rounded-2xl">

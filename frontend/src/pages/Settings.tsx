@@ -9,6 +9,7 @@ import {
   listCategories,
 } from "../features/categories/api";
 import type { CategoryKind } from "../features/categories/types";
+import { createTag, deleteTag, listTags } from "../features/tags/api";
 import {
   createWallet,
   deleteWallet,
@@ -30,6 +31,9 @@ export function Settings() {
 
   const [categoryName, setCategoryName] = useState("");
   const [categoryKind, setCategoryKind] = useState<CategoryKind>("expense");
+
+  const [tagName, setTagName] = useState("");
+  const tagsQuery = useQuery({ queryKey: ["tags"], queryFn: listTags });
 
   const createWalletMutation = useMutation({
     mutationFn: createWallet,
@@ -55,6 +59,19 @@ export function Settings() {
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["categories"] }),
+  });
+
+  const createTagMutation = useMutation({
+    mutationFn: createTag,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tags"] });
+      setTagName("");
+    },
+  });
+
+  const deleteTagMutation = useMutation({
+    mutationFn: deleteTag,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tags"] }),
   });
 
   const inputClass =
@@ -229,6 +246,69 @@ export function Settings() {
             <p className="px-4 py-3 text-sm text-white/40">
               Nenhuma categoria ainda.
             </p>
+          )}
+        </div>
+      </motion.section>
+
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="glass mt-8 rounded-2xl p-6"
+      >
+        <h2 className="font-display mb-4 text-lg font-semibold">Tags</h2>
+        <p className="mb-4 text-xs text-white/40">
+          Use tags pra marcar transações com rótulos livres (ex: "reembolsável",
+          "viagem"), além da categoria.
+        </p>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!tagName.trim()) return;
+            createTagMutation.mutate({ name: tagName });
+          }}
+          className="mb-4 flex gap-2"
+        >
+          <input
+            value={tagName}
+            onChange={(e) => setTagName(e.target.value)}
+            placeholder="Nome da tag"
+            className={`flex-1 ${inputClass}`}
+          />
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            type="submit"
+            className="btn-gradient rounded-lg px-4 py-1.5 text-sm font-semibold text-black"
+          >
+            Adicionar
+          </motion.button>
+        </form>
+
+        <div className="flex flex-wrap gap-2">
+          <AnimatePresence initial={false}>
+            {(tagsQuery.data ?? []).map((t) => (
+              <motion.span
+                key={t.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="glass-strong flex items-center gap-2 rounded-full px-3 py-1 text-xs text-white/80"
+              >
+                {t.name}
+                <button
+                  type="button"
+                  onClick={() => deleteTagMutation.mutate(t.id)}
+                  className="text-white/30 hover:text-pink-400"
+                >
+                  <IconTrash className="h-3 w-3" />
+                </button>
+              </motion.span>
+            ))}
+          </AnimatePresence>
+          {(tagsQuery.data ?? []).length === 0 && (
+            <p className="text-sm text-white/40">Nenhuma tag ainda.</p>
           )}
         </div>
       </motion.section>

@@ -22,4 +22,5 @@ export interface TransactionPayload {
   type: TransactionType;
   description: string;
   date: string;
+  tags?: number[];
 }
