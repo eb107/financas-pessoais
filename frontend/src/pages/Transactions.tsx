@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { IconTrash } from "../components/icons";
 import { Layout } from "../components/Layout";
 import { listCategories } from "../features/categories/api";
 import {
@@ -21,6 +23,11 @@ const schema = z.object({
 });
 
 type FormData = z.infer<typeof schema>;
+
+const currency = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
 
 export function Transactions() {
   const queryClient = useQueryClient();
@@ -75,45 +82,88 @@ export function Transactions() {
   const categories = categoriesQuery.data ?? [];
   const transactions = transactionsQuery.data ?? [];
 
+  const totalIncome = transactions
+    .filter((t) => t.type === "income")
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+  const totalExpense = transactions
+    .filter((t) => t.type === "expense")
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+  const balance = totalIncome - totalExpense;
+
+  const stats = [
+    { label: "Saldo", value: balance, tone: "text-gradient" },
+    { label: "Receitas", value: totalIncome, tone: "text-emerald-400" },
+    { label: "Despesas", value: totalExpense, tone: "text-pink-400" },
+  ];
+
   return (
     <Layout>
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">Transações</h1>
+      <h1 className="font-display mb-1 text-3xl font-bold">Transações</h1>
+      <p className="mb-6 text-sm text-white/50">
+        Acompanhe suas entradas e saídas em tempo real.
+      </p>
 
-      <form
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: i * 0.08 }}
+            className="glass rounded-2xl p-5"
+          >
+            <p className="text-xs font-medium tracking-wide text-white/40 uppercase">
+              {s.label}
+            </p>
+            <p className={`font-display mt-2 text-2xl font-bold ${s.tone}`}>
+              {currency.format(s.value)}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+
+      <motion.form
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.24 }}
         onSubmit={handleSubmit(onSubmit)}
-        className="mb-8 grid grid-cols-2 gap-3 rounded-lg border bg-white p-4 sm:grid-cols-3"
+        className="glass mb-8 grid grid-cols-2 gap-3 rounded-2xl p-5 sm:grid-cols-3"
       >
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">
+          <label className="mb-1 block text-xs font-medium text-white/50">
             Carteira
           </label>
           <select
             {...register("wallet")}
-            className="w-full rounded border px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
           >
-            <option value="">Selecione</option>
+            <option value="" className="bg-surface">
+              Selecione
+            </option>
             {wallets.map((w) => (
-              <option key={w.id} value={w.id}>
+              <option key={w.id} value={w.id} className="bg-surface">
                 {w.name}
               </option>
             ))}
           </select>
           {errors.wallet && (
-            <p className="text-xs text-red-600">{errors.wallet.message}</p>
+            <p className="text-xs text-pink-400">{errors.wallet.message}</p>
           )}
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">
+          <label className="mb-1 block text-xs font-medium text-white/50">
             Categoria
           </label>
           <select
             {...register("category")}
-            className="w-full rounded border px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
           >
-            <option value="">Sem categoria</option>
+            <option value="" className="bg-surface">
+              Sem categoria
+            </option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>
+              <option key={c.id} value={c.id} className="bg-surface">
                 {c.name}
               </option>
             ))}
@@ -121,106 +171,118 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">
+          <label className="mb-1 block text-xs font-medium text-white/50">
             Tipo
           </label>
           <select
             {...register("type")}
-            className="w-full rounded border px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
           >
-            <option value="expense">Despesa</option>
-            <option value="income">Receita</option>
-            <option value="transfer">Transferência</option>
+            <option value="expense" className="bg-surface">
+              Despesa
+            </option>
+            <option value="income" className="bg-surface">
+              Receita
+            </option>
+            <option value="transfer" className="bg-surface">
+              Transferência
+            </option>
           </select>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">
+          <label className="mb-1 block text-xs font-medium text-white/50">
             Valor
           </label>
           <input
             {...register("amount")}
             placeholder="0.00"
-            className="w-full rounded border px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-accent-cyan/60"
           />
           {errors.amount && (
-            <p className="text-xs text-red-600">{errors.amount.message}</p>
+            <p className="text-xs text-pink-400">{errors.amount.message}</p>
           )}
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">
+          <label className="mb-1 block text-xs font-medium text-white/50">
             Data
           </label>
           <input
             type="date"
             {...register("date")}
-            className="w-full rounded border px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">
+          <label className="mb-1 block text-xs font-medium text-white/50">
             Descrição
           </label>
           <input
             {...register("description")}
-            className="w-full rounded border px-2 py-1.5 text-sm"
+            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-accent-cyan/60"
           />
         </div>
 
         <div className="col-span-2 sm:col-span-3">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={isSubmitting}
-            className="rounded bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="btn-gradient rounded-lg px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
           >
             Adicionar transação
-          </button>
+          </motion.button>
         </div>
-      </form>
+      </motion.form>
 
       {transactionsQuery.isLoading && (
-        <p className="text-gray-500">Carregando transações...</p>
+        <p className="text-white/40">Carregando transações...</p>
       )}
 
       {!transactionsQuery.isLoading && transactions.length === 0 && (
-        <p className="text-gray-500">Nenhuma transação ainda.</p>
+        <p className="text-white/40">Nenhuma transação ainda.</p>
       )}
 
-      <div className="overflow-hidden rounded-lg border bg-white">
-        {transactions.map((t) => (
-          <div
-            key={t.id}
-            className="flex items-center justify-between border-b px-4 py-3 last:border-b-0"
-          >
-            <div>
-              <p className="font-medium text-gray-800">
-                {t.description || "(sem descrição)"}
-              </p>
-              <p className="text-xs text-gray-500">{t.date}</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <span
-                className={
-                  t.type === "expense"
-                    ? "font-semibold text-red-600"
-                    : "font-semibold text-green-600"
-                }
-              >
-                {t.type === "expense" ? "-" : "+"}
-                {t.amount}
-              </span>
-              <button
-                type="button"
-                onClick={() => deleteMutation.mutate(t.id)}
-                className="text-xs text-gray-400 hover:text-red-600"
-              >
-                remover
-              </button>
-            </div>
-          </div>
-        ))}
+      <div className="glass overflow-hidden rounded-2xl">
+        <AnimatePresence initial={false}>
+          {transactions.map((t, i) => (
+            <motion.div
+              key={t.id}
+              layout
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 12 }}
+              transition={{ duration: 0.25, delay: i * 0.02 }}
+              className="flex items-center justify-between border-b border-white/5 px-5 py-3.5 last:border-b-0 hover:bg-white/[0.03]"
+            >
+              <div>
+                <p className="font-medium text-white/90">
+                  {t.description || "(sem descrição)"}
+                </p>
+                <p className="text-xs text-white/40">{t.date}</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <span
+                  className={`font-display font-semibold ${
+                    t.type === "expense" ? "text-pink-400" : "text-emerald-400"
+                  }`}
+                >
+                  {t.type === "expense" ? "-" : "+"}
+                  {currency.format(Number(t.amount))}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => deleteMutation.mutate(t.id)}
+                  className="rounded-md p-1.5 text-white/30 transition hover:bg-white/10 hover:text-pink-400"
+                >
+                  <IconTrash className="h-4 w-4" />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </Layout>
   );

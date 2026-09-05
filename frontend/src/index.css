@@ -1,1 +1,106 @@
 @import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-sans: "Inter", sans-serif;
+
+  --color-bg: #06060a;
+  --color-surface: #0d0d16;
+  --color-accent-cyan: #22d3ee;
+  --color-accent-violet: #a855f7;
+  --color-accent-pink: #ec4899;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: rgba(255, 255, 255, 0.92);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .text-gradient {
+    background: linear-gradient(
+      90deg,
+      var(--color-accent-cyan),
+      var(--color-accent-violet) 55%,
+      var(--color-accent-pink)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .btn-gradient {
+    background: linear-gradient(
+      90deg,
+      var(--color-accent-cyan),
+      var(--color-accent-violet)
+    );
+    transition:
+      filter 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .btn-gradient:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 24px rgba(168, 85, 247, 0.45);
+  }
+
+  .btn-gradient:active {
+    transform: scale(0.98);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(2%, -4%) scale(1.05);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-3%, 3%) scale(1.08);
+  }
+}
+
+.animate-float {
+  animation: float 14s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 18s ease-in-out infinite;
+}
+
+* {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
