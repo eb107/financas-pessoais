@@ -25,13 +25,13 @@ docker compose up -d --build
 
 ## Status
 
-🚧 Em construção — Fase 2 (dashboards analíticos).
+🚧 Em construção — Fase 3 (orçamentos e filtros avançados).
 
 ## Roadmap
 
 - [x] Fase 0 — Fundação (Docker, scaffolding backend/frontend)
 - [x] Fase 1 — Autenticação + CRUD core
-- [ ] Fase 2 — Dashboards analíticos
+- [x] Fase 2 — Dashboards analíticos
 - [ ] Fase 3 — Orçamentos e filtros avançados
 - [ ] Fase 4 — Categorização automática (IA)
 - [ ] Fase 5 — Previsão de gastos (IA)

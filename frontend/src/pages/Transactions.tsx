@@ -82,45 +82,12 @@ export function Transactions() {
   const categories = categoriesQuery.data ?? [];
   const transactions = transactionsQuery.data ?? [];
 
-  const totalIncome = transactions
-    .filter((t) => t.type === "income")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-  const totalExpense = transactions
-    .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + Number(t.amount), 0);
-  const balance = totalIncome - totalExpense;
-
-  const stats = [
-    { label: "Saldo", value: balance, tone: "text-gradient" },
-    { label: "Receitas", value: totalIncome, tone: "text-emerald-400" },
-    { label: "Despesas", value: totalExpense, tone: "text-pink-400" },
-  ];
-
   return (
     <Layout>
       <h1 className="font-display mb-1 text-3xl font-bold">Transações</h1>
       <p className="mb-6 text-sm text-white/50">
-        Acompanhe suas entradas e saídas em tempo real.
+        Suas transações mais recentes — veja os totais no Dashboard.
       </p>
-
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: i * 0.08 }}
-            className="glass rounded-2xl p-5"
-          >
-            <p className="text-xs font-medium tracking-wide text-white/40 uppercase">
-              {s.label}
-            </p>
-            <p className={`font-display mt-2 text-2xl font-bold ${s.tone}`}>
-              {currency.format(s.value)}
-            </p>
-          </motion.div>
-        ))}
-      </div>
 
       <motion.form
         initial={{ opacity: 0, y: 16 }}

@@ -3,10 +3,17 @@ import type { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/useAuth";
 import { GlowBackground } from "./GlowBackground";
-import { IconLogout, IconSettings, IconSpark, IconTransactions } from "./icons";
+import {
+  IconDashboard,
+  IconLogout,
+  IconSettings,
+  IconSpark,
+  IconTransactions,
+} from "./icons";
 
 const NAV_ITEMS = [
-  { to: "/", label: "Transações", icon: IconTransactions },
+  { to: "/", label: "Dashboard", icon: IconDashboard },
+  { to: "/transactions", label: "Transações", icon: IconTransactions },
   { to: "/settings", label: "Configurações", icon: IconSettings },
 ];
 

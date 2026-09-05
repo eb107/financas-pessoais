@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { Dashboard } from "../pages/Dashboard";
 import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
 import { Settings } from "../pages/Settings";
@@ -13,6 +14,14 @@ export function AppRouter() {
         <Route path="/register" element={<Register />} />
         <Route
           path="/"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
           element={
             <ProtectedRoute>
               <Transactions />
