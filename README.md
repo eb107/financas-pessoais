@@ -10,7 +10,7 @@ assistente e insights automáticos).
 - **Backend:** Python + Django + Django REST Framework (gerenciado com `uv`)
 - **Banco de dados:** PostgreSQL
 - **IA:** API da Anthropic (Claude)
-- **Infra:** Docker Compose
+- **Infra:** Docker Compose (Redis + Celery pra tarefas em background)
 
 ## Como rodar
 
@@ -25,7 +25,7 @@ docker compose up -d --build
 
 ## Status
 
-🚧 Em construção — Fase 5 (previsão de gastos com IA).
+🚧 Em construção — Fase 6 (chat assistente com IA).
 
 ## Roadmap
 
@@ -34,7 +34,7 @@ docker compose up -d --build
 - [x] Fase 2 — Dashboards analíticos
 - [x] Fase 3 — Orçamentos e filtros avançados
 - [x] Fase 4 — Categorização automática (IA)
-- [ ] Fase 5 — Previsão de gastos (IA)
+- [x] Fase 5 — Previsão de gastos (IA)
 - [ ] Fase 6 — Chat assistente (IA)
 - [ ] Fase 7 — Insights e alertas automáticos (IA)
 - [ ] Fase 8 — Testes, CI e polish final

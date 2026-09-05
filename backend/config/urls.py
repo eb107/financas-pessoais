@@ -13,4 +13,5 @@ urlpatterns = [
     path("api/", include("apps.analytics.urls")),
     path("api/", include("apps.budgets.urls")),
     path("api/", include("apps.ai_categorization.urls")),
+    path("api/", include("apps.ai_forecasting.urls")),
 ]

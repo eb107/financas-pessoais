@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'apps.analytics',
     'apps.budgets',
     'apps.ai_categorization',
+    'apps.ai_forecasting',
 ]
 
 MIDDLEWARE = [
@@ -158,6 +159,21 @@ SIMPLE_JWT = {
 
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
 ANTHROPIC_MODEL_FAST = env("ANTHROPIC_MODEL_FAST", default="claude-haiku-4-5")
+
+
+# Celery + Redis
+# https://docs.celeryq.dev/
+
+REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+# Roda a task sincronamente (sem broker) em testes/scripts que não sobem o
+# worker — útil pra rodar `generate_forecast` direto no shell durante o dev.
+CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
 
 
 # Internationalization

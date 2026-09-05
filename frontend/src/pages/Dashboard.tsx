@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import {
   Area,
   AreaChart,
@@ -12,12 +13,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { IconSpark } from "../components/icons";
 import { Layout } from "../components/Layout";
 import {
   fetchByCategory,
   fetchCashflow,
   fetchSummary,
 } from "../features/analytics/api";
+import { listForecasts, triggerForecast } from "../features/forecasting/api";
 
 const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -63,9 +66,27 @@ function ChartTooltip({
 }
 
 export function Dashboard() {
+  const queryClient = useQueryClient();
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const summaryQuery = useQuery({
     queryKey: ["analytics", "summary"],
     queryFn: fetchSummary,
+  });
+  const forecastQuery = useQuery({
+    queryKey: ["forecasts"],
+    queryFn: listForecasts,
+  });
+
+  const generateMutation = useMutation({
+    mutationFn: triggerForecast,
+    onSuccess: () => {
+      setIsGenerating(true);
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["forecasts"] });
+        setIsGenerating(false);
+      }, 2500);
+    },
   });
   const categoryQuery = useQuery({
     queryKey: ["analytics", "by-category"],
@@ -82,6 +103,12 @@ export function Dashboard() {
     ...m,
     label: monthLabel(m.month),
   }));
+
+  const forecasts = forecastQuery.data ?? [];
+  const totalForecast = forecasts.find((f) => f.category === null);
+  const categoryForecasts = forecasts
+    .filter((f) => f.category !== null)
+    .sort((a, b) => Number(b.predicted_amount) - Number(a.predicted_amount));
 
   const stats = [
     {
@@ -251,6 +278,67 @@ export function Dashboard() {
           )}
         </motion.div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.36 }}
+        className="glass mt-6 rounded-2xl p-6"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="font-display text-lg font-semibold">
+              Previsão de gastos
+            </h2>
+            <p className="text-xs text-white/40">
+              Estimativa pro próximo mês, por categoria (regressão linear
+              sobre o histórico).
+            </p>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            type="button"
+            disabled={generateMutation.isPending || isGenerating}
+            onClick={() => generateMutation.mutate()}
+            className="btn-gradient flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-sm font-semibold text-black disabled:opacity-50"
+          >
+            <IconSpark className="h-3.5 w-3.5" />
+            {isGenerating ? "Gerando..." : "Gerar previsão"}
+          </motion.button>
+        </div>
+
+        {totalForecast && (
+          <p className="mb-3 text-sm text-white/70">
+            Total previsto:{" "}
+            <span className="font-display font-semibold text-white">
+              {currency.format(Number(totalForecast.predicted_amount))}
+            </span>
+          </p>
+        )}
+
+        {categoryForecasts.length === 0 && !isGenerating && (
+          <p className="text-sm text-white/40">
+            Nenhuma previsão gerada ainda — clique em "Gerar previsão"
+            (precisa de pelo menos 3 meses de histórico por categoria).
+          </p>
+        )}
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {categoryForecasts.map((f) => (
+            <div
+              key={f.id}
+              className="rounded-xl border border-white/5 bg-white/[0.03] p-3"
+            >
+              <p className="truncate text-xs text-white/40">
+                {f.category_name}
+              </p>
+              <p className="font-display text-sm font-semibold text-white/90">
+                {currency.format(Number(f.predicted_amount))}
+              </p>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </Layout>
   );
 }
