@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'apps.budgets',
     'apps.ai_categorization',
     'apps.ai_forecasting',
+    'apps.ai_assistant',
 ]
 
 MIDDLEWARE = [
@@ -144,6 +145,7 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_RATES": {
         "ai": "30/day",
+        "ai_chat": "50/day",
     },
 }
 
@@ -159,6 +161,7 @@ SIMPLE_JWT = {
 
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
 ANTHROPIC_MODEL_FAST = env("ANTHROPIC_MODEL_FAST", default="claude-haiku-4-5")
+ANTHROPIC_MODEL_CHAT = env("ANTHROPIC_MODEL_CHAT", default="claude-sonnet-5")
 
 
 # Celery + Redis

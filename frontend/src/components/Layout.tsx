@@ -5,6 +5,7 @@ import { useAuth } from "../features/auth/useAuth";
 import { GlowBackground } from "./GlowBackground";
 import {
   IconBudget,
+  IconChat,
   IconDashboard,
   IconLogout,
   IconSettings,
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { to: "/", label: "Dashboard", icon: IconDashboard },
   { to: "/transactions", label: "Transações", icon: IconTransactions },
   { to: "/budgets", label: "Orçamentos", icon: IconBudget },
+  { to: "/chat", label: "Chat IA", icon: IconChat },
   { to: "/settings", label: "Configurações", icon: IconSettings },
 ];
 

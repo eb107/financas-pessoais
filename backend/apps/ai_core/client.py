@@ -4,6 +4,7 @@ from django.conf import settings
 from .prompts.categorize import build_categorize_prompt
 
 _client = None
+CHAT_MAX_TOKENS = 1024
 
 
 def _get_client():
@@ -41,3 +42,29 @@ def categorize_transaction(description: str, category_names: list[str]) -> str |
         if name.lower() == text.lower():
             return name
     return None
+
+
+def chat_completion(
+    system_prompt: str, messages: list[dict[str, str]]
+) -> tuple[str, int]:
+    """Manda o histórico da conversa + contexto pro modelo "forte" do chat.
+
+    Usa ANTHROPIC_MODEL_CHAT (configurável, mais capaz que o Haiku usado em
+    categorização) — aqui o usuário pode fazer perguntas abertas, então vale
+    a qualidade extra. Retorna (texto_da_resposta, tokens_usados_total).
+    """
+    client = _get_client()
+
+    response = client.messages.create(
+        model=settings.ANTHROPIC_MODEL_CHAT,
+        max_tokens=CHAT_MAX_TOKENS,
+        system=system_prompt,
+        messages=messages,
+    )
+
+    text = "".join(
+        block.text for block in response.content if block.type == "text"
+    ).strip()
+    tokens_used = response.usage.input_tokens + response.usage.output_tokens
+
+    return text, tokens_used
