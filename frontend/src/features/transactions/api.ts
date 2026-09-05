@@ -43,3 +43,18 @@ export async function updateTransactionTags(id: number, tags: number[]) {
 export async function deleteTransaction(id: number) {
   await api.delete(`/api/transactions/${id}/`);
 }
+
+export interface CategorizeResult {
+  category?: number;
+  category_name?: string;
+  confidence?: number;
+  source: "rule" | "ai" | null;
+  detail?: string;
+}
+
+export async function categorizeTransaction(id: number) {
+  const { data } = await api.post<CategorizeResult>(
+    `/api/ai/transactions/${id}/categorize/`,
+  );
+  return data;
+}

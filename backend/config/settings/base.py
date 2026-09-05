@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'apps.transactions',
     'apps.analytics',
     'apps.budgets',
+    'apps.ai_categorization',
 ]
 
 MIDDLEWARE = [
@@ -140,6 +141,9 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_RATES": {
+        "ai": "30/day",
+    },
 }
 
 SIMPLE_JWT = {
@@ -147,6 +151,13 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
 }
+
+
+# Anthropic (Claude) — integração de IA
+# https://docs.claude.com/en/api
+
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+ANTHROPIC_MODEL_FAST = env("ANTHROPIC_MODEL_FAST", default="claude-haiku-4-5")
 
 
 # Internationalization

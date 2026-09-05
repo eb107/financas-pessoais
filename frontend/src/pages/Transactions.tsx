@@ -4,11 +4,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { IconTrash } from "../components/icons";
+import { IconSpark, IconTrash } from "../components/icons";
 import { Layout } from "../components/Layout";
 import { listCategories } from "../features/categories/api";
 import { listTags } from "../features/tags/api";
 import {
+  categorizeTransaction,
   createTransaction,
   deleteTransaction,
   listTransactions,
@@ -39,6 +40,9 @@ export function Transactions() {
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<TransactionFilters>({});
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
+  const [categorizeFeedback, setCategorizeFeedback] = useState<
+    Record<number, string>
+  >({});
 
   const walletsQuery = useQuery({ queryKey: ["wallets"], queryFn: listWallets });
   const categoriesQuery = useQuery({
@@ -64,6 +68,19 @@ export function Transactions() {
     mutationFn: deleteTransaction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
+
+  const categorizeMutation = useMutation({
+    mutationFn: categorizeTransaction,
+    onSuccess: (result, id) => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      setCategorizeFeedback((prev) => ({
+        ...prev,
+        [id]: result.category_name
+          ? `${result.category_name} (${result.source === "rule" ? "regra" : "IA"})`
+          : "sem sugestão",
+      }));
     },
   });
 
@@ -381,9 +398,34 @@ export function Transactions() {
                 <p className="font-medium text-white/90">
                   {t.description || "(sem descrição)"}
                 </p>
-                <p className="text-xs text-white/40">{t.date}</p>
+                <p className="text-xs text-white/40">
+                  {t.date}
+                  {t.category &&
+                    ` · ${categories.find((c) => c.id === t.category)?.name ?? ""}`}
+                  {!t.category && categorizeFeedback[t.id] && (
+                    <span className="text-accent-cyan">
+                      {" "}
+                      · sugestão: {categorizeFeedback[t.id]}
+                    </span>
+                  )}
+                </p>
               </div>
               <div className="flex items-center gap-4">
+                {!t.category && (
+                  <button
+                    type="button"
+                    onClick={() => categorizeMutation.mutate(t.id)}
+                    disabled={categorizeMutation.isPending}
+                    title="Sugerir categoria com IA"
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-white/40 transition hover:bg-white/10 hover:text-accent-cyan disabled:opacity-40"
+                  >
+                    <IconSpark className="h-3.5 w-3.5" />
+                    {categorizeMutation.isPending &&
+                    categorizeMutation.variables === t.id
+                      ? "..."
+                      : "Categorizar"}
+                  </button>
+                )}
                 <span
                   className={`font-display font-semibold ${
                     t.type === "expense" ? "text-pink-400" : "text-emerald-400"
