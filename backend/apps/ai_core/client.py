@@ -2,6 +2,7 @@ import anthropic
 from django.conf import settings
 
 from .prompts.categorize import build_categorize_prompt
+from .prompts.insights import build_insights_prompt
 
 _client = None
 CHAT_MAX_TOKENS = 1024
@@ -68,3 +69,35 @@ def chat_completion(
     tokens_used = response.usage.input_tokens + response.usage.output_tokens
 
     return text, tokens_used
+
+
+def generate_insight_texts(raw_patterns: list[str]) -> list[str]:
+    """Narra, numa chamada só (independente de quantos padrões existam), o
+    texto humano de cada padrão já detectado por regra determinística.
+
+    Usa o modelo rápido (Haiku) — só está reescrevendo números já corretos
+    de forma mais natural, não precisa de raciocínio.
+    """
+    if not raw_patterns:
+        return []
+
+    client = _get_client()
+    prompt = build_insights_prompt(raw_patterns)
+
+    response = client.messages.create(
+        model=settings.ANTHROPIC_MODEL_FAST,
+        max_tokens=60 * len(raw_patterns),
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    text = "".join(
+        block.text for block in response.content if block.type == "text"
+    ).strip()
+    lines = [line.strip() for line in text.split("\n") if line.strip()]
+
+    if len(lines) != len(raw_patterns):
+        # Resposta não veio no formato esperado — melhor usar o texto cru
+        # da regra do que arriscar mapear linha errada pro padrão errado.
+        return raw_patterns
+
+    return lines

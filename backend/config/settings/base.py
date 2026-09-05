@@ -13,6 +13,7 @@ from datetime import timedelta
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     'apps.ai_categorization',
     'apps.ai_forecasting',
     'apps.ai_assistant',
+    'apps.ai_insights',
 ]
 
 MIDDLEWARE = [
@@ -177,6 +179,15 @@ CELERY_TIMEZONE = "UTC"
 # Roda a task sincronamente (sem broker) em testes/scripts que não sobem o
 # worker — útil pra rodar `generate_forecast` direto no shell durante o dev.
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=False)
+
+# Rotina diária de insights — 1 chamada de IA por usuário por dia (ver
+# apps/ai_insights/tasks.py). Horário em UTC (08:00 UTC = 05:00 em Brasília).
+CELERY_BEAT_SCHEDULE = {
+    "generate-insights-daily": {
+        "task": "apps.ai_insights.tasks.generate_insights_for_all_users",
+        "schedule": crontab(hour=8, minute=0),
+    },
+}
 
 
 # Internationalization

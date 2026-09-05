@@ -3,6 +3,7 @@ import { ProtectedRoute } from "../components/ProtectedRoute";
 import { Budgets } from "../pages/Budgets";
 import { Chat } from "../pages/Chat";
 import { Dashboard } from "../pages/Dashboard";
+import { Insights } from "../pages/Insights";
 import { Login } from "../pages/Login";
 import { Register } from "../pages/Register";
 import { Settings } from "../pages/Settings";
@@ -43,6 +44,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute>
               <Chat />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/insights"
+          element={
+            <ProtectedRoute>
+              <Insights />
             </ProtectedRoute>
           }
         />

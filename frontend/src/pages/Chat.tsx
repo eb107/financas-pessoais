@@ -24,10 +24,16 @@ export function Chat() {
     queryFn: listSessions,
   });
 
+  const sessions = sessionsQuery.data ?? [];
+  // Deriva a sessão ativa em vez de sincronizar via efeito: evita precisar
+  // de setState dentro de um useEffect só pra "seguir" o primeiro item
+  // assim que a lista carrega.
+  const activeSessionId = selectedSessionId ?? sessions[0]?.id ?? null;
+
   const messagesQuery = useQuery({
-    queryKey: ["chat-messages", selectedSessionId],
-    queryFn: () => listMessages(selectedSessionId as number),
-    enabled: selectedSessionId !== null,
+    queryKey: ["chat-messages", activeSessionId],
+    queryFn: () => listMessages(activeSessionId as number),
+    enabled: activeSessionId !== null,
   });
 
   const createSessionMutation = useMutation({
@@ -51,28 +57,21 @@ export function Chat() {
       sendMessage(id, content),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["chat-messages", selectedSessionId],
+        queryKey: ["chat-messages", activeSessionId],
       });
       queryClient.invalidateQueries({ queryKey: ["chat-sessions"] });
     },
   });
 
-  const sessions = sessionsQuery.data ?? [];
   const messages = messagesQuery.data ?? [];
-
-  useEffect(() => {
-    if (selectedSessionId === null && sessions.length > 0) {
-      setSelectedSessionId(sessions[0].id);
-    }
-  }, [sessions, selectedSessionId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
   function handleSend() {
-    if (!input.trim() || selectedSessionId === null) return;
-    sendMessageMutation.mutate({ id: selectedSessionId, content: input });
+    if (!input.trim() || activeSessionId === null) return;
+    sendMessageMutation.mutate({ id: activeSessionId, content: input });
     setInput("");
   }
 
@@ -106,7 +105,7 @@ export function Chat() {
                   exit={{ opacity: 0 }}
                   onClick={() => setSelectedSessionId(s.id)}
                   className={`group mb-1 flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs transition ${
-                    selectedSessionId === s.id
+                    activeSessionId === s.id
                       ? "bg-white/10 text-white"
                       : "text-white/50 hover:bg-white/5 hover:text-white/80"
                   }`}
@@ -136,7 +135,7 @@ export function Chat() {
         </div>
 
         <div className="flex flex-col">
-          {selectedSessionId === null ? (
+          {activeSessionId === null ? (
             <div className="flex flex-1 flex-col items-center justify-center gap-2 text-white/30">
               <IconChat className="h-8 w-8" />
               <p className="text-sm">

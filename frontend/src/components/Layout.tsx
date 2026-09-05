@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../features/auth/useAuth";
 import { GlowBackground } from "./GlowBackground";
 import {
+  IconBell,
   IconBudget,
   IconChat,
   IconDashboard,
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { to: "/transactions", label: "Transações", icon: IconTransactions },
   { to: "/budgets", label: "Orçamentos", icon: IconBudget },
   { to: "/chat", label: "Chat IA", icon: IconChat },
+  { to: "/insights", label: "Insights", icon: IconBell },
   { to: "/settings", label: "Configurações", icon: IconSettings },
 ];
 

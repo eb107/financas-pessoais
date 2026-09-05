@@ -51,6 +51,22 @@ services:
       - db
       - redis
 
+  celery-beat:
+    build: ./backend
+    command: uv run celery -A config beat -l info
+    volumes:
+      - ./backend:/app
+      - /app/.venv
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
   frontend:
     build: ./frontend
     command: npm run dev -- --host 0.0.0.0
