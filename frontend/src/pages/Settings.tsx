@@ -136,6 +136,9 @@ export function Settings() {
             <option value="cash" className="bg-surface">
               Dinheiro
             </option>
+            <option value="benefit" className="bg-surface">
+              Vale/Benefício
+            </option>
           </select>
           <motion.button
             whileTap={{ scale: 0.97 }}

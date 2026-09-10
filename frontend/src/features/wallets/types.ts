@@ -1,4 +1,9 @@
-export type WalletType = "checking" | "savings" | "credit_card" | "cash";
+export type WalletType =
+  | "checking"
+  | "savings"
+  | "credit_card"
+  | "cash"
+  | "benefit";
 
 export interface Wallet {
   id: number;

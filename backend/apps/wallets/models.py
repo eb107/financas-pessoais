@@ -10,6 +10,7 @@ class Wallet(TimeStampedModel):
         SAVINGS = "savings", "Poupança"
         CREDIT_CARD = "credit_card", "Cartão de crédito"
         CASH = "cash", "Dinheiro"
+        BENEFIT = "benefit", "Vale/Benefício"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="wallets"
