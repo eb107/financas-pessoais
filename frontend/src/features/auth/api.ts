@@ -24,3 +24,7 @@ export async function fetchMe() {
 export async function logout(refresh: string) {
   await api.post("/api/auth/logout/", { refresh });
 }
+
+export async function revokeAiConsent() {
+  await api.delete("/api/auth/ai-consent/");
+}

@@ -118,6 +118,14 @@ export function Register() {
             Entrar
           </Link>
         </p>
+
+        <p className="mt-3 text-center text-xs text-white/30">
+          Ao criar sua conta, você concorda com nosso{" "}
+          <Link to="/privacidade" className="text-accent-cyan hover:underline">
+            Aviso de Privacidade
+          </Link>
+          .
+        </p>
       </motion.form>
     </div>
   );

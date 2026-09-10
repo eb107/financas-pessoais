@@ -148,6 +148,31 @@ def test_export_leaves_an_audit_trail(auth_client, user):
     assert log.username == user.username
 
 
+def test_me_includes_ai_consent_status(auth_client):
+    response = auth_client.get("/api/auth/me/")
+
+    assert response.status_code == 200
+    assert response.data["ai_consent_given_at"] is None
+
+
+def test_revoke_ai_consent_requires_authentication(api_client):
+    response = api_client.delete("/api/auth/ai-consent/")
+    assert response.status_code == 401
+
+
+def test_revoke_ai_consent_clears_the_timestamp(auth_client, user):
+    """Direito de revogar consentimento a qualquer momento (LGPD Art. 8º,
+    §5º / Art. 18, IX), com efeito real: o campo volta a None."""
+    user.record_ai_consent()
+    assert user.ai_consent_given_at is not None
+
+    response = auth_client.delete("/api/auth/ai-consent/")
+
+    assert response.status_code == 204
+    user.refresh_from_db()
+    assert user.ai_consent_given_at is None
+
+
 def test_record_ai_consent_is_idempotent(user):
     assert user.ai_consent_given_at is None
 

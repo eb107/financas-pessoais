@@ -5,6 +5,7 @@ import { Chat } from "../pages/Chat";
 import { Dashboard } from "../pages/Dashboard";
 import { Insights } from "../pages/Insights";
 import { Login } from "../pages/Login";
+import { Privacy } from "../pages/Privacy";
 import { Register } from "../pages/Register";
 import { Settings } from "../pages/Settings";
 import { Transactions } from "../pages/Transactions";
@@ -15,6 +16,7 @@ export function AppRouter() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/privacidade" element={<Privacy />} />
         <Route
           path="/"
           element={

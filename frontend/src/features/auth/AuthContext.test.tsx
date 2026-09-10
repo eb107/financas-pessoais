@@ -14,7 +14,12 @@ function wrapper({ children }: { children: ReactNode }) {
   return <AuthProvider>{children}</AuthProvider>;
 }
 
-const alice = { id: 1, username: "alice", email: "alice@example.com" };
+const alice = {
+  id: 1,
+  username: "alice",
+  email: "alice@example.com",
+  ai_consent_given_at: null,
+};
 
 describe("AuthProvider / useAuth", () => {
   beforeEach(() => {
