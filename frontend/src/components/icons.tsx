@@ -213,6 +213,24 @@ export function IconMoon({ className }: { className?: string }) {
   );
 }
 
+export function IconGoal({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M12 2v4M12 2c-4 3-8 7-8 12a8 8 0 0 0 16 0c0-5-4-9-8-12Z" />
+      <path d="M12 22v-6" />
+      <circle cx="12" cy="12" r="2.5" />
+    </svg>
+  );
+}
+
 export function IconTrash({ className }: { className?: string }) {
   return (
     <svg

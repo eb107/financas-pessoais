@@ -101,3 +101,23 @@ def generate_insight_texts(raw_patterns: list[str]) -> list[str]:
         return raw_patterns
 
     return lines
+
+
+def suggest_goal_plan(prompt: str) -> str:
+    """Gera sugestões de como o usuário pode atingir uma meta de poupança.
+
+    Usa o modelo rápido (Haiku) — os números já vêm calculados de forma
+    determinística no prompt, a IA só precisa narrar sugestões em cima
+    deles, sem raciocínio matemático extra.
+    """
+    client = _get_client()
+
+    response = client.messages.create(
+        model=settings.ANTHROPIC_MODEL_FAST,
+        max_tokens=300,
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    return "".join(
+        block.text for block in response.content if block.type == "text"
+    ).strip()
