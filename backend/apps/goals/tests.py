@@ -131,6 +131,59 @@ def test_cannot_use_another_users_wallet_in_goal(auth_client, other_user):
     assert response.status_code == 400
 
 
+def test_down_payment_becomes_the_savings_target(auth_client, wallet):
+    goal = Goal.objects.create(
+        user=wallet.user,
+        name="Comprar um carro financiado",
+        target_amount=60000,
+        down_payment_amount=12000,
+        target_date=months_from_now(6),
+        wallet=wallet,
+    )
+    Transaction.objects.create(
+        wallet=wallet, amount=6000, type="income", date=date.today()
+    )
+
+    response = auth_client.get(f"/api/goals/{goal.id}/")
+
+    assert response.data["progress_percentage"] == 50.0
+    assert response.data["monthly_required"] == 1000.0
+    assert response.data["financed_amount"] == Decimal("48000.00")
+    assert response.data["is_achieved"] is False
+
+
+def test_goal_without_down_payment_uses_target_amount_as_savings_target(
+    auth_client, wallet
+):
+    goal = Goal.objects.create(
+        user=wallet.user,
+        name="Reserva",
+        target_amount=5000,
+        target_date=months_from_now(5),
+        wallet=wallet,
+    )
+
+    response = auth_client.get(f"/api/goals/{goal.id}/")
+
+    assert response.data["financed_amount"] is None
+    assert response.data["savings_target"] == Decimal("5000.00")
+
+
+def test_cannot_create_goal_with_down_payment_bigger_than_target(auth_client, wallet):
+    response = auth_client.post(
+        "/api/goals/",
+        {
+            "name": "Meta inválida",
+            "target_amount": "10000",
+            "down_payment_amount": "15000",
+            "target_date": months_from_now(6).isoformat(),
+            "wallet": wallet.id,
+        },
+    )
+
+    assert response.status_code == 400
+
+
 def test_cannot_see_another_users_goals(auth_client, other_user):
     other_wallet = Wallet.objects.create(user=other_user, name="Carteira do bob")
     Goal.objects.create(

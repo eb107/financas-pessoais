@@ -48,6 +48,16 @@ class GoalSuggestionView(APIView):
             monthly_required=float(data["monthly_required"]),
             months_remaining=data["months_remaining"],
             financial_context=build_financial_context(request.user),
+            down_payment_amount=(
+                float(data["down_payment_amount"])
+                if data["down_payment_amount"] is not None
+                else None
+            ),
+            financed_amount=(
+                float(data["financed_amount"])
+                if data["financed_amount"] is not None
+                else None
+            ),
         )
 
         try:

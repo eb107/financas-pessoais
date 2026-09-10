@@ -2,6 +2,7 @@ export interface Goal {
   id: number;
   name: string;
   target_amount: string;
+  down_payment_amount: string | null;
   target_date: string;
   wallet: number;
   wallet_name: string;
@@ -11,6 +12,8 @@ export interface Goal {
   progress_percentage: number;
   is_achieved: boolean;
   is_overdue: boolean;
+  savings_target: string;
+  financed_amount: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -18,6 +21,7 @@ export interface Goal {
 export interface GoalPayload {
   name: string;
   target_amount: string;
+  down_payment_amount?: string | null;
   target_date: string;
   wallet: number;
 }
