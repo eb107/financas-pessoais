@@ -205,7 +205,7 @@ export function Goals() {
         <button
           type="button"
           onClick={() => setShowFipe((v) => !v)}
-          className="mt-3 text-xs text-fg/40 underline decoration-dotted hover:text-accent-cyan"
+          className="mt-3 block text-xs text-fg/40 underline decoration-dotted hover:text-accent-cyan"
         >
           {showFipe ? "Esconder" : "Buscar valor de carro na tabela FIPE"}
         </button>
