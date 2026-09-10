@@ -1,0 +1,35 @@
+# Uso: docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d
+#
+# Liga acesso público temporário via Cloudflare Tunnel, sem mexer no
+# docker-compose.yml normal — "docker compose up" sozinho continua
+# funcionando exatamente como antes. Depois de "up", a URL pública
+# aparece nos logs do serviço cloudflared:
+#   docker compose logs cloudflared | grep trycloudflare
+#
+# Pra desligar só o modo túnel (mantendo o resto rodando):
+#   docker compose -f docker-compose.yml -f docker-compose.tunnel.yml down cloudflared nginx
+
+services:
+  backend:
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.tunnel
+
+  frontend:
+    environment:
+      VITE_API_URL: ""
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./nginx.tunnel.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --url http://nginx:8080
+    depends_on:
+      - nginx
