@@ -18,6 +18,8 @@ class GoalSerializer(serializers.ModelSerializer):
     progress_percentage = serializers.SerializerMethodField()
     is_achieved = serializers.SerializerMethodField()
     is_overdue = serializers.SerializerMethodField()
+    savings_target = serializers.SerializerMethodField()
+    financed_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Goal
@@ -25,6 +27,7 @@ class GoalSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "target_amount",
+            "down_payment_amount",
             "target_date",
             "wallet",
             "wallet_name",
@@ -34,10 +37,27 @@ class GoalSerializer(serializers.ModelSerializer):
             "progress_percentage",
             "is_achieved",
             "is_overdue",
+            "savings_target",
+            "financed_amount",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+    def validate(self, attrs):
+        down_payment = attrs.get(
+            "down_payment_amount",
+            getattr(self.instance, "down_payment_amount", None),
+        )
+        target_amount = attrs.get(
+            "target_amount", getattr(self.instance, "target_amount", None)
+        )
+        if down_payment is not None and target_amount is not None:
+            if down_payment > target_amount:
+                raise serializers.ValidationError(
+                    "O valor de entrada não pode ser maior que o valor total."
+                )
+        return attrs
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -63,6 +83,23 @@ class GoalSerializer(serializers.ModelSerializer):
     def get_current_amount(self, obj):
         return self._current_amount(obj)
 
+    def _savings_target(self, obj) -> Decimal:
+        # Quando há entrada definida, a meta de poupança é a entrada — o
+        # restante do valor do bem seria financiado, não guardado.
+        return (
+            obj.down_payment_amount
+            if obj.down_payment_amount is not None
+            else obj.target_amount
+        )
+
+    def get_savings_target(self, obj):
+        return self._savings_target(obj)
+
+    def get_financed_amount(self, obj):
+        if obj.down_payment_amount is None:
+            return None
+        return obj.target_amount - obj.down_payment_amount
+
     def get_months_remaining(self, obj) -> int:
         today = date.today()
         if obj.target_date <= today:
@@ -73,7 +110,7 @@ class GoalSerializer(serializers.ModelSerializer):
         return max(months, 1)
 
     def get_monthly_required(self, obj):
-        remaining_amount = obj.target_amount - self._current_amount(obj)
+        remaining_amount = self._savings_target(obj) - self._current_amount(obj)
         if remaining_amount <= 0:
             return 0
         months = self.get_months_remaining(obj)
@@ -82,13 +119,14 @@ class GoalSerializer(serializers.ModelSerializer):
         return round(float(remaining_amount) / months, 2)
 
     def get_progress_percentage(self, obj):
-        if obj.target_amount == 0:
+        savings_target = self._savings_target(obj)
+        if savings_target == 0:
             return 0
-        pct = float(self._current_amount(obj)) / float(obj.target_amount) * 100
+        pct = float(self._current_amount(obj)) / float(savings_target) * 100
         return round(max(pct, 0), 1)
 
     def get_is_achieved(self, obj) -> bool:
-        return self._current_amount(obj) >= obj.target_amount
+        return self._current_amount(obj) >= self._savings_target(obj)
 
     def get_is_overdue(self, obj) -> bool:
         return obj.target_date < date.today() and not self.get_is_achieved(obj)

@@ -23,6 +23,18 @@ class Goal(TimeStampedModel):
         related_name="goals",
         help_text="Carteira usada pra acompanhar o progresso automaticamente.",
     )
+    down_payment_amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text=(
+            "Valor de entrada, se a meta for financiar o restante do valor "
+            "total (opcional). Quando preenchido, o progresso e o quanto "
+            "guardar por mês passam a ser calculados sobre esse valor, não "
+            "sobre target_amount."
+        ),
+    )
 
     class Meta:
         ordering = ["target_date"]

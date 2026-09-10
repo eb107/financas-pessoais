@@ -153,6 +153,10 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "ai": "30/day",
         "ai_chat": "50/day",
+        # Consulta a tabela FIPE (API externa gratuita) — throttle mais
+        # generoso que o de IA, já que não tem custo de API, só protege
+        # contra abuso/flood no proxy.
+        "fipe": "60/min",
         # Login/registro/refresh são pré-autenticação (throttle por IP via
         # AnonRateThrottle) — protege contra força bruta de senha e
         # enumeração/spam de contas.
