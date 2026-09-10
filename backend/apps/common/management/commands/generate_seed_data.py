@@ -64,9 +64,7 @@ class Command(BaseCommand):
 
         with db_transaction.atomic():
             if options["clear"]:
-                deleted, _ = Transaction.objects.filter(
-                    wallet__user=user
-                ).delete()
+                deleted, _ = Transaction.objects.filter(wallet__user=user).delete()
                 self.stdout.write(f"Removidas {deleted} transações existentes.")
 
             wallet = self._ensure_wallet(user)
@@ -101,7 +99,9 @@ class Command(BaseCommand):
 
     def _generate_transactions(self, wallet, categories, months):
         expense_categories = [
-            c for name, kind in DEFAULT_CATEGORIES if kind == "expense"
+            c
+            for name, kind in DEFAULT_CATEGORIES
+            if kind == "expense"
             for c in [categories[name]]
         ]
 

@@ -30,6 +30,6 @@ class ForecastListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return ForecastResult.objects.filter(
-            user=self.request.user
-        ).select_related("category")
+        return ForecastResult.objects.filter(user=self.request.user).select_related(
+            "category"
+        )

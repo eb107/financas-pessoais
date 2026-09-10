@@ -9,9 +9,9 @@ def build_categorize_prompt(description: str, category_names: list[str]) -> str:
     return (
         "Você categoriza transações financeiras. Dada a descrição de uma "
         "transação, escolha a categoria mais provável dentre as opções "
-        "abaixo, ou responda \"Nenhuma\" se nenhuma se encaixar bem.\n\n"
+        'abaixo, ou responda "Nenhuma" se nenhuma se encaixar bem.\n\n'
         f"Categorias disponíveis:\n{options}\n\n"
-        f"Descrição da transação: \"{description}\"\n\n"
+        f'Descrição da transação: "{description}"\n\n'
         "Responda APENAS com o nome exato de uma categoria da lista acima, "
-        "ou \"Nenhuma\". Sem explicação, sem pontuação extra."
+        'ou "Nenhuma". Sem explicação, sem pontuação extra.'
     )
