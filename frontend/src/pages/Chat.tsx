@@ -78,12 +78,12 @@ export function Chat() {
   return (
     <Layout>
       <h1 className="font-display mb-1 text-3xl font-bold">Chat IA</h1>
-      <p className="mb-6 text-sm text-white/50">
+      <p className="mb-6 text-sm text-fg/50">
         Pergunte sobre suas finanças em linguagem natural.
       </p>
 
       <div className="glass grid h-[600px] grid-cols-1 gap-0 overflow-hidden rounded-2xl sm:grid-cols-[220px_1fr]">
-        <div className="flex flex-col border-r border-white/5">
+        <div className="flex flex-col border-r border-fg/5">
           <div className="p-3">
             <motion.button
               whileTap={{ scale: 0.97 }}
@@ -106,8 +106,8 @@ export function Chat() {
                   onClick={() => setSelectedSessionId(s.id)}
                   className={`group mb-1 flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs transition ${
                     activeSessionId === s.id
-                      ? "bg-white/10 text-white"
-                      : "text-white/50 hover:bg-white/5 hover:text-white/80"
+                      ? "bg-fg/10 text-fg"
+                      : "text-fg/50 hover:bg-fg/5 hover:text-fg/80"
                   }`}
                 >
                   <span className="truncate">
@@ -119,7 +119,7 @@ export function Chat() {
                       e.stopPropagation();
                       deleteSessionMutation.mutate(s.id);
                     }}
-                    className="hidden shrink-0 text-white/30 hover:text-pink-400 group-hover:block"
+                    className="hidden shrink-0 text-fg/30 hover:text-pink-400 group-hover:block"
                   >
                     <IconTrash className="h-3 w-3" />
                   </button>
@@ -127,7 +127,7 @@ export function Chat() {
               ))}
             </AnimatePresence>
             {sessions.length === 0 && (
-              <p className="px-3 py-2 text-xs text-white/30">
+              <p className="px-3 py-2 text-xs text-fg/30">
                 Nenhuma conversa ainda.
               </p>
             )}
@@ -136,7 +136,7 @@ export function Chat() {
 
         <div className="flex flex-col">
           {activeSessionId === null ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-2 text-white/30">
+            <div className="flex flex-1 flex-col items-center justify-center gap-2 text-fg/30">
               <IconChat className="h-8 w-8" />
               <p className="text-sm">
                 Crie uma conversa nova pra começar a perguntar.
@@ -156,7 +156,7 @@ export function Chat() {
                       className={`max-w-[75%] rounded-2xl px-4 py-2 text-sm ${
                         m.role === "user"
                           ? "btn-gradient text-black"
-                          : "glass-strong text-white/90"
+                          : "glass-strong text-fg/90"
                       }`}
                     >
                       {m.content}
@@ -165,7 +165,7 @@ export function Chat() {
                 ))}
                 {sendMessageMutation.isPending && (
                   <div className="flex justify-start">
-                    <div className="glass-strong flex items-center gap-2 rounded-2xl px-4 py-2 text-sm text-white/50">
+                    <div className="glass-strong flex items-center gap-2 rounded-2xl px-4 py-2 text-sm text-fg/50">
                       <IconSpark className="h-3.5 w-3.5 animate-pulse" />
                       pensando...
                     </div>
@@ -174,7 +174,7 @@ export function Chat() {
                 <div ref={bottomRef} />
               </div>
 
-              <div className="flex items-center gap-2 border-t border-white/5 p-3">
+              <div className="flex items-center gap-2 border-t border-fg/5 p-3">
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -185,7 +185,7 @@ export function Chat() {
                     }
                   }}
                   placeholder="Pergunte algo sobre suas finanças..."
-                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-accent-cyan/60"
+                  className="flex-1 rounded-lg border border-fg/10 bg-fg/5 px-3 py-2 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60"
                 />
                 <motion.button
                   whileTap={{ scale: 0.95 }}

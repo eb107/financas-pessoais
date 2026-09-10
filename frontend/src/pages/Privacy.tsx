@@ -1,11 +1,15 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { GlowBackground } from "../components/GlowBackground";
+import { ThemeToggle } from "../components/ThemeToggle";
 
 export function Privacy() {
   return (
     <div className="relative flex min-h-screen justify-center px-4 py-12">
       <GlowBackground />
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 24 }}
@@ -16,7 +20,7 @@ export function Privacy() {
         <h1 className="font-display mb-1 text-3xl font-bold">
           Aviso de Privacidade
         </h1>
-        <p className="mb-8 text-sm text-white/50">
+        <p className="mb-8 text-sm text-fg/50">
           Como o Finanças Pessoais trata dado pessoal, em conformidade com a
           LGPD (Lei nº 13.709/2018).
         </p>
@@ -25,7 +29,7 @@ export function Privacy() {
           <h2 className="font-display mb-2 text-lg font-semibold text-accent-cyan">
             Quem trata os dados
           </h2>
-          <p className="text-sm leading-relaxed text-white/70">
+          <p className="text-sm leading-relaxed text-fg/70">
             Projeto de portfólio pessoal, sem CNPJ ou operação comercial por
             trás. Não há Encarregado de Dados (DPO) formalmente designado — o
             próprio desenvolvedor é o ponto de contato para qualquer dúvida
@@ -37,7 +41,7 @@ export function Privacy() {
           <h2 className="font-display mb-2 text-lg font-semibold text-accent-cyan">
             Quais dados são coletados
           </h2>
-          <ul className="list-inside list-disc space-y-1.5 text-sm leading-relaxed text-white/70">
+          <ul className="list-inside list-disc space-y-1.5 text-sm leading-relaxed text-fg/70">
             <li>Username, e-mail e senha (com hash) — identificação e autenticação.</li>
             <li>
               Carteiras, categorias, tags, transações e orçamentos — é a
@@ -49,7 +53,7 @@ export function Privacy() {
               (registro de consentimento).
             </li>
           </ul>
-          <p className="mt-3 text-sm leading-relaxed text-white/50">
+          <p className="mt-3 text-sm leading-relaxed text-fg/50">
             Nenhum dado sensível pela definição da LGPD (origem racial,
             convicção religiosa, saúde, dado biométrico, etc.) é coletado.
             Dado financeiro é dado pessoal comum, não dado sensível.
@@ -60,28 +64,28 @@ export function Privacy() {
           <h2 className="font-display mb-2 text-lg font-semibold text-accent-cyan">
             IA e compartilhamento com terceiros
           </h2>
-          <p className="mb-2 text-sm leading-relaxed text-white/70">
+          <p className="mb-2 text-sm leading-relaxed text-fg/70">
             Três funcionalidades enviam dado pessoal pra API da Anthropic
             (Claude), empresa americana — uma transferência internacional de
             dados:
           </p>
-          <ul className="list-inside list-disc space-y-1.5 text-sm leading-relaxed text-white/70">
+          <ul className="list-inside list-disc space-y-1.5 text-sm leading-relaxed text-fg/70">
             <li>
-              <strong className="text-white/90">Categorização automática:</strong>{" "}
+              <strong className="text-fg/90">Categorização automática:</strong>{" "}
               a descrição da transação, só quando nenhuma regra local
               reconhece o texto.
             </li>
             <li>
-              <strong className="text-white/90">Chat assistente:</strong> um
+              <strong className="text-fg/90">Chat assistente:</strong> um
               resumo financeiro agregado — nunca o histórico bruto de
               transações.
             </li>
             <li>
-              <strong className="text-white/90">Insights automáticos:</strong>{" "}
+              <strong className="text-fg/90">Insights automáticos:</strong>{" "}
               os padrões já detectados localmente, narrados em texto natural.
             </li>
           </ul>
-          <p className="mt-3 text-sm leading-relaxed text-white/50">
+          <p className="mt-3 text-sm leading-relaxed text-fg/50">
             A previsão de gastos <strong>não</strong> usa IA — é regressão
             linear local, nenhum dado sai do servidor. Nenhuma das três
             chamadas acontece antes de você usar alguma funcionalidade de IA
@@ -98,7 +102,7 @@ export function Privacy() {
           <h2 className="font-display mb-2 text-lg font-semibold text-accent-cyan">
             Retenção e segurança
           </h2>
-          <p className="text-sm leading-relaxed text-white/70">
+          <p className="text-sm leading-relaxed text-fg/70">
             Insights e tokens de autenticação expirados são removidos
             automaticamente após um tempo. Senhas nunca ficam em texto
             plano, cada usuário só acessa os próprios dados, e a exportação
@@ -111,7 +115,7 @@ export function Privacy() {
           <h2 className="font-display mb-2 text-lg font-semibold text-accent-cyan">
             Seus direitos
           </h2>
-          <ul className="list-inside list-disc space-y-1.5 text-sm leading-relaxed text-white/70">
+          <ul className="list-inside list-disc space-y-1.5 text-sm leading-relaxed text-fg/70">
             <li>Confirmar quais dados existem, em Configurações.</li>
             <li>Exportar todos os seus dados a qualquer momento.</li>
             <li>Corrigir dados incorretos diretamente pela interface.</li>
