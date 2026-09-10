@@ -13,6 +13,16 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
+# Não manda a URL completa (que pode ter dado sensível numa query string)
+# como referrer pra sites de fora quando o usuário clica num link externo.
+SECURE_REFERRER_POLICY = "same-origin"
+
+# Isola a janela/aba do nosso site de outras abas de origens diferentes,
+# mitigando uma classe de ataques (Spectre-like side-channels e alguns
+# tipos de popup/tabnabbing) que dependem de duas origens compartilharem
+# o mesmo processo de navegador.
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+
 # HSTS: começa curto (1 dia) de propósito — só aumentar para semanas/meses
 # depois de confirmar que HTTPS funciona em todos os subdomínios/rotas.
 # Um HSTS longo configurado errado "tranca" os usuários fora do site até
