@@ -156,6 +156,14 @@ REST_FRAMEWORK = {
         # enumeração/spam de contas.
         "auth": "5/min",
     },
+    # Quantos proxies reversos confiáveis existem entre o cliente e o
+    # Django, reescrevendo X-Forwarded-For a cada salto (não só repassando
+    # o que o cliente mandou). 0 = ignora esse header por completo e usa
+    # REMOTE_ADDR direto — mais seguro como padrão: sem isso, um cliente
+    # poderia forjar o próprio X-Forwarded-For pra contornar o rate
+    # limiting por IP. Só aumentar em produção se de fato houver um proxy
+    # reverso na frente (ver TRUSTED_PROXY_COUNT no .env).
+    "NUM_PROXIES": env.int("TRUSTED_PROXY_COUNT", default=0),
 }
 
 SIMPLE_JWT = {

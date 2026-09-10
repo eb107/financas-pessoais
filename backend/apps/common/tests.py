@@ -4,10 +4,11 @@ import pytest
 from django.contrib.auth.models import AnonymousUser
 from django.core.cache import cache
 from django.core.management import call_command
-from django.test import RequestFactory
+from django.test import RequestFactory, override_settings
 from django.utils import timezone
 
 from apps.ai_insights.models import Insight
+from apps.common.network import get_client_ip
 from apps.common.permissions import IsOwner
 from apps.transactions.models import Transaction
 from apps.wallets.models import Wallet
@@ -76,6 +77,36 @@ def test_purge_old_data_removes_insights_past_retention_but_keeps_recent_ones(us
 
     assert not Insight.objects.filter(pk=old_insight.pk).exists()
     assert Insight.objects.filter(pk=recent_insight.pk).exists()
+
+
+def test_get_client_ip_uses_remote_addr_by_default():
+    """NUM_PROXIES=0 (padrão do projeto): ignora X-Forwarded-For por
+    completo, mesmo que a requisição venha com um valor forjado nele —
+    sem proxy real na frente, não há motivo pra confiar nesse header."""
+    request = RequestFactory().get(
+        "/", HTTP_X_FORWARDED_FOR="203.0.113.5", REMOTE_ADDR="10.0.0.1"
+    )
+    assert get_client_ip(request) == "10.0.0.1"
+
+
+def test_get_client_ip_extracts_correct_hop_when_num_proxies_configured():
+    from django.conf import settings as django_settings
+
+    overridden = {**django_settings.REST_FRAMEWORK, "NUM_PROXIES": 1}
+    with override_settings(REST_FRAMEWORK=overridden):
+        request = RequestFactory().get(
+            "/", HTTP_X_FORWARDED_FOR="203.0.113.5", REMOTE_ADDR="10.0.0.1"
+        )
+        assert get_client_ip(request) == "203.0.113.5"
+
+
+def test_get_client_ip_falls_back_to_remote_addr_without_xff_header():
+    from django.conf import settings as django_settings
+
+    overridden = {**django_settings.REST_FRAMEWORK, "NUM_PROXIES": 1}
+    with override_settings(REST_FRAMEWORK=overridden):
+        request = RequestFactory().get("/", REMOTE_ADDR="10.0.0.1")
+        assert get_client_ip(request) == "10.0.0.1"
 
 
 def test_admin_login_is_rate_limited_after_too_many_attempts(client):
