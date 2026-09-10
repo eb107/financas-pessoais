@@ -5,6 +5,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from .data_export import build_user_data_export
 from .serializers import RegisterSerializer, UserSerializer
 from .throttles import AuthRateThrottle
 
@@ -48,9 +49,24 @@ class LogoutView(APIView):
         return Response(status=status.HTTP_205_RESET_CONTENT)
 
 
-class MeView(generics.RetrieveAPIView):
+class MeView(generics.RetrieveDestroyAPIView):
+    """GET retorna o usuário atual. DELETE apaga a conta (direito de
+    exclusão, LGPD Art. 18) — o cascade das ForeignKeys (Wallet, Category,
+    Tag, Budget, ForecastResult, Insight, ChatSession) já garante que todo
+    o dado pessoal associado é removido junto, numa única operação."""
+
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+
+class MeExportView(APIView):
+    """Exporta todos os dados pessoais do usuário autenticado num JSON só
+    (direito de portabilidade, LGPD Art. 18)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        return Response(build_user_data_export(request.user))
