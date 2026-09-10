@@ -54,10 +54,12 @@ INSTALLED_APPS = [
     "apps.transactions",
     "apps.analytics",
     "apps.budgets",
+    "apps.goals",
     "apps.ai_categorization",
     "apps.ai_forecasting",
     "apps.ai_assistant",
     "apps.ai_insights",
+    "apps.ai_goals",
 ]
 
 MIDDLEWARE = [
