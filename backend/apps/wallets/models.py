@@ -21,5 +21,8 @@ class Wallet(TimeStampedModel):
     currency = models.CharField(max_length=3, default="BRL")
     initial_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
+    class Meta:
+        ordering = ["-created_at"]
+
     def __str__(self):
         return self.name

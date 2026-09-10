@@ -25,6 +25,9 @@ package = false
 
 [dependency-groups]
 dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-django>=4.14.0",
     "ruff>=0.16.6",
 ]
 
@@ -39,3 +42,9 @@ ignore = [
     "RUF012", # mutable class defaults — false positive on Django's Meta/Admin classes
     "F405",   # names from `from .base import *` in dev/prod/test settings — intentional pattern
 ]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["tests.py", "test_*.py"]
+testpaths = ["apps"]
+addopts = "-ra --cov=apps --cov-report=term-missing"

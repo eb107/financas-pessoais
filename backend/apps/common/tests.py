@@ -1,2 +1,49 @@
+from datetime import date
 
-# Create your tests here.
+import pytest
+from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory
+
+from apps.common.permissions import IsOwner
+from apps.transactions.models import Transaction
+from apps.wallets.models import Wallet
+
+pytestmark = pytest.mark.django_db
+
+
+def test_health_check_is_public(client):
+    response = client.get("/api/health/")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
+class TestIsOwner:
+    def _request_for(self, user):
+        request = RequestFactory().get("/")
+        request.user = user
+        return request
+
+    def test_allows_direct_owner(self, user):
+        wallet = Wallet.objects.create(user=user, name="Nubank")
+        assert IsOwner().has_object_permission(self._request_for(user), None, wallet)
+
+    def test_denies_non_owner(self, user, other_user):
+        wallet = Wallet.objects.create(user=user, name="Nubank")
+        assert not IsOwner().has_object_permission(
+            self._request_for(other_user), None, wallet
+        )
+
+    def test_allows_indirect_owner_via_wallet(self, user):
+        wallet = Wallet.objects.create(user=user, name="Nubank")
+        transaction = Transaction.objects.create(
+            wallet=wallet, amount=10, type="expense", date=date.today()
+        )
+        assert IsOwner().has_object_permission(
+            self._request_for(user), None, transaction
+        )
+
+    def test_denies_anonymous(self, user):
+        wallet = Wallet.objects.create(user=user, name="Nubank")
+        assert not IsOwner().has_object_permission(
+            self._request_for(AnonymousUser()), None, wallet
+        )
