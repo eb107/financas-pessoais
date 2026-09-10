@@ -63,6 +63,18 @@ class MeView(generics.RetrieveDestroyAPIView):
     def get_object(self):
         return self.request.user
 
+    def destroy(self, request, *args, **kwargs):
+        # Exclusão é irreversível — exigir a senha atual de novo evita que
+        # um access token vazado (30 min de vida, guardado em localStorage)
+        # seja suficiente sozinho pra apagar a conta inteira.
+        password = request.data.get("current_password")
+        if not password or not request.user.check_password(password):
+            return Response(
+                {"detail": "Senha atual incorreta ou não informada."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
     def perform_destroy(self, instance):
         # Registrado ANTES do delete, e com SET_NULL no FK do AuditLog:
         # a evidência de que a conta foi excluída precisa sobreviver à
