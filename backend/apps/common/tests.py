@@ -1,9 +1,12 @@
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from django.contrib.auth.models import AnonymousUser
+from django.core.management import call_command
 from django.test import RequestFactory
+from django.utils import timezone
 
+from apps.ai_insights.models import Insight
 from apps.common.permissions import IsOwner
 from apps.transactions.models import Transaction
 from apps.wallets.models import Wallet
@@ -47,3 +50,22 @@ class TestIsOwner:
         assert not IsOwner().has_object_permission(
             self._request_for(AnonymousUser()), None, wallet
         )
+
+
+def test_purge_old_data_removes_insights_past_retention_but_keeps_recent_ones(user):
+    """LGPD Art. 15/16 — retenção: insight velho não tem valor de negócio
+    nenhum depois de um tempo, e não deveria ficar guardado pra sempre."""
+    old_insight = Insight.objects.create(
+        user=user, type="budget_exceeded", title="Velho", body="...", severity="info"
+    )
+    Insight.objects.filter(pk=old_insight.pk).update(
+        generated_at=timezone.now() - timedelta(days=400)
+    )
+    recent_insight = Insight.objects.create(
+        user=user, type="budget_exceeded", title="Recente", body="...", severity="info"
+    )
+
+    call_command("purge_old_data", insights_days=365)
+
+    assert not Insight.objects.filter(pk=old_insight.pk).exists()
+    assert Insight.objects.filter(pk=recent_insight.pk).exists()

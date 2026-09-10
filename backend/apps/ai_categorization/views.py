@@ -33,6 +33,10 @@ class CategorizeTransactionView(APIView):
         except Transaction.DoesNotExist:
             return Response({"detail": "Transação não encontrada."}, status=404)
 
+        # Registra consentimento ao usar o endpoint, independente do
+        # resultado bater por regra ou precisar cair na IA de fato.
+        request.user.record_ai_consent()
+
         rule_match = categorize_by_rules(transaction.description)
         if rule_match:
             category_name, source, confidence = rule_match, "rule", 1.0

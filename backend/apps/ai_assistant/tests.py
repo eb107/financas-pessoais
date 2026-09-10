@@ -64,6 +64,20 @@ def test_message_with_api_key_uses_mocked_ai_reply(auth_client, user, monkeypatc
     assert assistant_message["tokens_used"] == 42
 
 
+@override_settings(ANTHROPIC_API_KEY="")
+def test_sending_message_records_ai_consent(auth_client, user):
+    session = ChatSession.objects.create(user=user)
+    assert user.ai_consent_given_at is None
+
+    auth_client.post(
+        f"/api/ai/chat/sessions/{session.id}/messages/",
+        {"content": "Quanto gastei esse mês?"},
+    )
+
+    user.refresh_from_db()
+    assert user.ai_consent_given_at is not None
+
+
 def test_cannot_access_another_users_session_messages(auth_client, other_user):
     other_session = ChatSession.objects.create(user=other_user)
 

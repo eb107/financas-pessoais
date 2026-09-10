@@ -59,6 +59,8 @@ class ChatMessageListCreateView(APIView):
         serializer.is_valid(raise_exception=True)
         user_content = serializer.validated_data["content"]
 
+        request.user.record_ai_consent()
+
         user_message = ChatMessage.objects.create(
             session=session, role=ChatMessage.Role.USER, content=user_content
         )

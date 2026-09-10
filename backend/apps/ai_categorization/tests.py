@@ -86,6 +86,19 @@ def test_no_rule_match_falls_back_to_ai(auth_client, wallet, user, monkeypatch):
     assert transaction.category.name == "Lazer"
 
 
+def test_categorize_endpoint_records_ai_consent(auth_client, wallet, user):
+    Category.objects.create(user=user, name="Transporte", kind="expense")
+    transaction = Transaction.objects.create(
+        wallet=wallet, amount=25, type="expense", date=date.today(), description="Uber"
+    )
+    assert user.ai_consent_given_at is None
+
+    auth_client.post(f"/api/ai/transactions/{transaction.id}/categorize/")
+
+    user.refresh_from_db()
+    assert user.ai_consent_given_at is not None
+
+
 def test_returns_404_for_transaction_from_another_user(auth_client, other_user):
     other_wallet = Wallet.objects.create(user=other_user, name="Carteira do bob")
     other_transaction = Transaction.objects.create(

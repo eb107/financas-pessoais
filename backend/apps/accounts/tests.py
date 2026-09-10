@@ -98,6 +98,23 @@ def test_delete_account_cascades_to_personal_data(auth_client, user):
     assert not Wallet.objects.filter(id=wallet.id).exists()
 
 
+def test_delete_account_leaves_an_audit_trail_that_survives_the_deletion(
+    auth_client, user
+):
+    """O log da exclusão precisa sobreviver à própria exclusão da conta —
+    senão a auditoria não prova nada. AuditLog.user usa SET_NULL de
+    propósito (ver apps/common/models.py)."""
+    from apps.common.models import AuditLog
+
+    username = user.username
+
+    auth_client.delete("/api/auth/me/")
+
+    log = AuditLog.objects.get(action=AuditLog.Action.ACCOUNT_DELETION)
+    assert log.username == username
+    assert log.user is None
+
+
 def test_export_requires_authentication(api_client):
     response = api_client.get("/api/auth/me/export/")
     assert response.status_code == 401
@@ -119,6 +136,27 @@ def test_export_returns_only_the_authenticated_users_own_data(
     assert response.data["user"]["username"] == user.username
     wallet_names = [w["name"] for w in response.data["wallets"]]
     assert wallet_names == ["Minha carteira"]
+
+
+def test_export_leaves_an_audit_trail(auth_client, user):
+    from apps.common.models import AuditLog
+
+    auth_client.get("/api/auth/me/export/")
+
+    log = AuditLog.objects.get(action=AuditLog.Action.DATA_EXPORT)
+    assert log.user == user
+    assert log.username == user.username
+
+
+def test_record_ai_consent_is_idempotent(user):
+    assert user.ai_consent_given_at is None
+
+    user.record_ai_consent()
+    first_timestamp = user.ai_consent_given_at
+    assert first_timestamp is not None
+
+    user.record_ai_consent()
+    assert user.ai_consent_given_at == first_timestamp
 
 
 def test_login_is_rate_limited_after_too_many_attempts(api_client, user):
