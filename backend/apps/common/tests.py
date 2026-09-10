@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 import pytest
 from django.contrib.auth.models import AnonymousUser
+from django.core.cache import cache
 from django.core.management import call_command
 from django.test import RequestFactory
 from django.utils import timezone
@@ -12,6 +13,12 @@ from apps.transactions.models import Transaction
 from apps.wallets.models import Wallet
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture(autouse=True)
+def _clear_cache():
+    cache.clear()
+    yield
 
 
 def test_health_check_is_public(client):
@@ -69,3 +76,26 @@ def test_purge_old_data_removes_insights_past_retention_but_keeps_recent_ones(us
 
     assert not Insight.objects.filter(pk=old_insight.pk).exists()
     assert Insight.objects.filter(pk=recent_insight.pk).exists()
+
+
+def test_admin_login_is_rate_limited_after_too_many_attempts(client):
+    """O login do admin usa autenticação própria do Django (sessão), fora
+    do alcance do AuthRateThrottle do DRF — sem o middleware dedicado,
+    não haveria limite nenhum de tentativas ali."""
+    for _ in range(5):
+        client.post("/admin/login/", {"username": "root", "password": "senha-errada"})
+
+    response = client.post(
+        "/admin/login/", {"username": "root", "password": "senha-errada"}
+    )
+
+    assert response.status_code == 429
+
+
+def test_admin_login_rate_limit_does_not_affect_other_routes(client):
+    for _ in range(5):
+        client.post("/admin/login/", {"username": "root", "password": "x"})
+
+    response = client.get("/api/health/")
+
+    assert response.status_code == 200

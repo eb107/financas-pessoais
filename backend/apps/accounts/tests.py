@@ -3,6 +3,8 @@ from django.core.cache import cache
 
 pytestmark = pytest.mark.django_db
 
+TEST_PASSWORD = "s3nhaSegura!23"  # noqa: S105 — mesma senha das fixtures em conftest.py
+
 
 @pytest.fixture(autouse=True)
 def _clear_throttle_cache():
@@ -83,6 +85,26 @@ def test_delete_account_requires_authentication(api_client):
     assert response.status_code == 401
 
 
+def test_delete_account_requires_current_password(auth_client, user):
+    """Exclusão é irreversível — um access token sozinho (vazado via XSS,
+    por exemplo) não pode ser suficiente pra apagar a conta inteira."""
+    from apps.accounts.models import User
+
+    response = auth_client.delete("/api/auth/me/")
+
+    assert response.status_code == 400
+    assert User.objects.filter(id=user.id).exists()
+
+
+def test_delete_account_rejects_wrong_current_password(auth_client, user):
+    from apps.accounts.models import User
+
+    response = auth_client.delete("/api/auth/me/", {"current_password": "senha-errada"})
+
+    assert response.status_code == 400
+    assert User.objects.filter(id=user.id).exists()
+
+
 def test_delete_account_cascades_to_personal_data(auth_client, user):
     """Direito de exclusão (LGPD Art. 18): apagar a conta precisa apagar
     junto todo o dado pessoal associado, não deixar nada órfão pra trás."""
@@ -91,7 +113,7 @@ def test_delete_account_cascades_to_personal_data(auth_client, user):
 
     wallet = Wallet.objects.create(user=user, name="Nubank")
 
-    response = auth_client.delete("/api/auth/me/")
+    response = auth_client.delete("/api/auth/me/", {"current_password": TEST_PASSWORD})
 
     assert response.status_code == 204
     assert not User.objects.filter(id=user.id).exists()
@@ -108,7 +130,7 @@ def test_delete_account_leaves_an_audit_trail_that_survives_the_deletion(
 
     username = user.username
 
-    auth_client.delete("/api/auth/me/")
+    auth_client.delete("/api/auth/me/", {"current_password": TEST_PASSWORD})
 
     log = AuditLog.objects.get(action=AuditLog.Action.ACCOUNT_DELETION)
     assert log.username == username
