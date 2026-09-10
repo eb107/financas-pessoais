@@ -36,6 +36,11 @@ nos 4 apps de IA:
 
 ## Consequências
 - Custo previsível e limitado, mesmo sem monitoramento externo de billing.
+- Enviar dado pessoal (descrição de transação, resumo financeiro) pra um
+  terceiro americano é uma transferência internacional de dados sob a
+  LGPD — ver [`docs/privacidade.md`](../privacidade.md) para o texto
+  completo de transparência sobre isso e o registro de consentimento
+  (`User.ai_consent_given_at`).
 - Complexidade extra: cada view de IA precisa checar
   `settings.ANTHROPIC_API_KEY` e tratar `anthropic.APIError` explicitamente
   (ver também [ADR 0002](./0002-jwt-para-autenticacao.md) para o padrão

@@ -35,8 +35,9 @@ cd frontend && npm test
 
 CI (`.github/workflows/ci.yml`) roda lint + testes de backend e frontend em
 paralelo a cada push/PR. Ver [`docs/architecture.md`](docs/architecture.md)
-para a visão geral da arquitetura e [`docs/adr/`](docs/adr/) para as
-decisões com trade-offs relevantes.
+para a visão geral da arquitetura, [`docs/adr/`](docs/adr/) para as
+decisões com trade-offs relevantes, e [`docs/privacidade.md`](docs/privacidade.md)
+para como o app trata dados pessoais (LGPD).
 
 ## Status
 
