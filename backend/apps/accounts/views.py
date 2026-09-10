@@ -88,3 +88,19 @@ class MeExportView(APIView):
             action=AuditLog.Action.DATA_EXPORT,
         )
         return Response(build_user_data_export(request.user))
+
+
+class AIConsentView(APIView):
+    """Permite revogar o consentimento de IA a qualquer momento (LGPD
+    Art. 8º, §5º / Art. 18, IX), com efeito real: enquanto revogado, a
+    rotina automática de insights (Celery beat) não chama a Anthropic pra
+    esse usuário — ver o gate em apps/ai_insights/tasks.py. Usar qualquer
+    funcionalidade de IA de novo concede o consentimento outra vez
+    automaticamente (User.record_ai_consent)."""
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request):
+        request.user.ai_consent_given_at = None
+        request.user.save(update_fields=["ai_consent_given_at"])
+        return Response(status=status.HTTP_204_NO_CONTENT)

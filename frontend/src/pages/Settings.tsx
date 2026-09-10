@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { IconTrash } from "../components/icons";
 import { Layout } from "../components/Layout";
+import { fetchMe, revokeAiConsent } from "../features/auth/api";
 import {
   createCategory,
   deleteCategory,
@@ -19,6 +21,12 @@ import type { WalletType } from "../features/wallets/types";
 
 export function Settings() {
   const queryClient = useQueryClient();
+
+  const meQuery = useQuery({ queryKey: ["me"], queryFn: fetchMe });
+  const revokeAiConsentMutation = useMutation({
+    mutationFn: revokeAiConsent,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["me"] }),
+  });
 
   const walletsQuery = useQuery({ queryKey: ["wallets"], queryFn: listWallets });
   const categoriesQuery = useQuery({
@@ -311,6 +319,56 @@ export function Settings() {
             <p className="text-sm text-white/40">Nenhuma tag ainda.</p>
           )}
         </div>
+      </motion.section>
+
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        className="glass mt-8 rounded-2xl p-6"
+      >
+        <h2 className="font-display mb-4 text-lg font-semibold">
+          Privacidade e IA
+        </h2>
+
+        {meQuery.data?.ai_consent_given_at ? (
+          <>
+            <p className="mb-4 text-sm text-white/70">
+              Você autorizou o uso de funcionalidades de IA em{" "}
+              {new Date(meQuery.data.ai_consent_given_at).toLocaleString(
+                "pt-BR",
+              )}
+              . Você pode revogar essa autorização a qualquer momento — depois
+              disso, nenhuma chamada à IA será feita em seu nome (nem mesmo
+              pela rotina automática diária de insights) até você usar
+              alguma função de IA de novo.
+            </p>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              type="button"
+              disabled={revokeAiConsentMutation.isPending}
+              onClick={() => revokeAiConsentMutation.mutate()}
+              className="rounded-lg border border-pink-400/30 px-4 py-1.5 text-sm font-medium text-pink-400 transition hover:bg-pink-400/10 disabled:opacity-50"
+            >
+              {revokeAiConsentMutation.isPending
+                ? "Revogando..."
+                : "Revogar consentimento de IA"}
+            </motion.button>
+          </>
+        ) : (
+          <p className="mb-4 text-sm text-white/50">
+            Você ainda não usou nenhuma funcionalidade de IA (categorização,
+            chat ou insights) — nenhum dado seu foi enviado a terceiros.
+          </p>
+        )}
+
+        <p className="mt-4 text-xs text-white/40">
+          Veja o{" "}
+          <Link to="/privacidade" className="text-accent-cyan hover:underline">
+            Aviso de Privacidade completo
+          </Link>{" "}
+          pra entender quais dados são coletados e como são usados.
+        </p>
       </motion.section>
     </Layout>
   );

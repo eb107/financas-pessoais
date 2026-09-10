@@ -107,6 +107,12 @@ export function Login() {
             Criar conta
           </Link>
         </p>
+
+        <p className="mt-3 text-center text-xs text-white/30">
+          <Link to="/privacidade" className="text-accent-cyan hover:underline">
+            Aviso de Privacidade
+          </Link>
+        </p>
       </motion.form>
     </div>
   );
