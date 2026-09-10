@@ -1,12 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { IconSpark, IconTrash } from "../components/icons";
+import {
+  IconPlus,
+  IconSearch,
+  IconSpark,
+  IconSwap,
+  IconTrash,
+} from "../components/icons";
 import { Layout } from "../components/Layout";
 import { listCategories } from "../features/categories/api";
+import type { Category } from "../features/categories/types";
 import { listTags } from "../features/tags/api";
 import {
   categorizeTransaction,
@@ -33,6 +40,22 @@ const currency = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
+const AVATAR_PALETTE = [
+  "#22d3ee",
+  "#a855f7",
+  "#ec4899",
+  "#34d399",
+  "#fbbf24",
+  "#60a5fa",
+  "#f87171",
+];
+
+function avatarColor(category: Category | undefined) {
+  if (category?.color) return category.color;
+  if (!category) return "#64748b";
+  return AVATAR_PALETTE[category.id % AVATAR_PALETTE.length];
+}
+
 const selectClass =
   "w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg outline-none focus:border-accent-cyan/60";
 
@@ -40,6 +63,7 @@ export function Transactions() {
   const queryClient = useQueryClient();
   const [filters, setFilters] = useState<TransactionFilters>({});
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
+  const [showForm, setShowForm] = useState(false);
   const [categorizeFeedback, setCategorizeFeedback] = useState<
     Record<number, string>
   >({});
@@ -122,145 +146,212 @@ export function Transactions() {
   const transactions = transactionsQuery.data ?? [];
   const hasActiveFilters = Object.keys(filters).length > 0;
 
+  const categoryById = useMemo(
+    () => new Map((categoriesQuery.data ?? []).map((c) => [c.id, c])),
+    [categoriesQuery.data],
+  );
+
+  const stats = useMemo(() => {
+    const list = transactionsQuery.data ?? [];
+    const income = list
+      .filter((t) => t.type === "income")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+    const expense = list
+      .filter((t) => t.type === "expense")
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+    return [
+      { label: "Receitas", value: income, tone: "text-emerald-400" },
+      { label: "Despesas", value: expense, tone: "text-pink-400" },
+      { label: "Saldo do período", value: income - expense, tone: "text-gradient" },
+      {
+        label: "Transações",
+        value: list.length,
+        tone: "text-fg",
+        isCount: true,
+      },
+    ];
+  }, [transactionsQuery.data]);
+
   return (
     <Layout>
-      <h1 className="font-display mb-1 text-3xl font-bold">Transações</h1>
-      <p className="mb-6 text-sm text-fg/50">
-        Suas transações mais recentes — veja os totais no Dashboard.
-      </p>
-
-      <motion.form
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.24 }}
-        onSubmit={handleSubmit(onSubmit)}
-        className="glass mb-6 grid grid-cols-2 gap-3 rounded-2xl p-5 sm:grid-cols-3"
-      >
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <label className="mb-1 block text-xs font-medium text-fg/50">
-            Carteira
-          </label>
-          <select {...register("wallet")} className={selectClass}>
-            <option value="" className="bg-surface">
-              Selecione
-            </option>
-            {wallets.map((w) => (
-              <option key={w.id} value={w.id} className="bg-surface">
-                {w.name}
-              </option>
-            ))}
-          </select>
-          {errors.wallet && (
-            <p className="text-xs text-pink-400">{errors.wallet.message}</p>
-          )}
+          <h1 className="font-display mb-1 text-3xl font-bold">Transações</h1>
+          <p className="text-sm text-fg/50">
+            Suas transações mais recentes — veja os totais no Dashboard.
+          </p>
         </div>
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          type="button"
+          onClick={() => setShowForm((v) => !v)}
+          className="btn-gradient flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-black"
+        >
+          <IconPlus className="h-4 w-4" />
+          {showForm ? "Fechar" : "Nova transação"}
+        </motion.button>
+      </div>
 
-        <div>
-          <label className="mb-1 block text-xs font-medium text-fg/50">
-            Categoria
-          </label>
-          <select {...register("category")} className={selectClass}>
-            <option value="" className="bg-surface">
-              Sem categoria
-            </option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id} className="bg-surface">
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-fg/50">
-            Tipo
-          </label>
-          <select {...register("type")} className={selectClass}>
-            <option value="expense" className="bg-surface">
-              Despesa
-            </option>
-            <option value="income" className="bg-surface">
-              Receita
-            </option>
-            <option value="transfer" className="bg-surface">
-              Transferência
-            </option>
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-fg/50">
-            Valor
-          </label>
-          <input
-            {...register("amount")}
-            placeholder="0.00"
-            className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60"
-          />
-          {errors.amount && (
-            <p className="text-xs text-pink-400">{errors.amount.message}</p>
-          )}
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-fg/50">
-            Data
-          </label>
-          <input
-            type="date"
-            {...register("date")}
-            className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg outline-none focus:border-accent-cyan/60"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-fg/50">
-            Descrição
-          </label>
-          <input
-            {...register("description")}
-            className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60"
-          />
-        </div>
-
-        {tags.length > 0 && (
-          <div className="col-span-2 sm:col-span-3">
-            <label className="mb-1 block text-xs font-medium text-fg/50">
-              Tags
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {tags.map((t) => {
-                const active = selectedTags.includes(t.id);
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => toggleTag(t.id)}
-                    className={`rounded-full px-3 py-1 text-xs transition ${
-                      active
-                        ? "btn-gradient text-black"
-                        : "border border-fg/10 bg-fg/5 text-fg/60 hover:bg-fg/10"
-                    }`}
-                  >
-                    {t.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        <div className="col-span-2 sm:col-span-3">
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={isSubmitting}
-            className="btn-gradient rounded-lg px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: i * 0.06 }}
+            className="glass min-w-0 rounded-2xl p-5"
           >
-            Adicionar transação
-          </motion.button>
-        </div>
-      </motion.form>
+            <p className="truncate text-xs font-medium tracking-wide text-fg/40 uppercase">
+              {s.label}
+            </p>
+            <p
+              className={`font-display mt-2 truncate text-xl font-bold sm:text-2xl ${s.tone}`}
+            >
+              {s.isCount ? s.value : currency.format(s.value)}
+            </p>
+          </motion.div>
+        ))}
+      </div>
+
+      <AnimatePresence initial={false}>
+        {showForm && (
+          <motion.form
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            onSubmit={handleSubmit(onSubmit)}
+            className="glass mb-6 overflow-hidden rounded-2xl"
+          >
+            <div className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-fg/50">
+                  Carteira
+                </label>
+                <select {...register("wallet")} className={selectClass}>
+                  <option value="" className="bg-surface">
+                    Selecione
+                  </option>
+                  {wallets.map((w) => (
+                    <option key={w.id} value={w.id} className="bg-surface">
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.wallet && (
+                  <p className="text-xs text-pink-400">{errors.wallet.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-fg/50">
+                  Categoria
+                </label>
+                <select {...register("category")} className={selectClass}>
+                  <option value="" className="bg-surface">
+                    Sem categoria
+                  </option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id} className="bg-surface">
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-fg/50">
+                  Tipo
+                </label>
+                <select {...register("type")} className={selectClass}>
+                  <option value="expense" className="bg-surface">
+                    Despesa
+                  </option>
+                  <option value="income" className="bg-surface">
+                    Receita
+                  </option>
+                  <option value="transfer" className="bg-surface">
+                    Transferência
+                  </option>
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-fg/50">
+                  Valor
+                </label>
+                <input
+                  {...register("amount")}
+                  placeholder="0.00"
+                  className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60"
+                />
+                {errors.amount && (
+                  <p className="text-xs text-pink-400">{errors.amount.message}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-fg/50">
+                  Data
+                </label>
+                <input
+                  type="date"
+                  {...register("date")}
+                  className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg outline-none focus:border-accent-cyan/60"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-fg/50">
+                  Descrição
+                </label>
+                <input
+                  {...register("description")}
+                  className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60"
+                />
+              </div>
+
+              {tags.length > 0 && (
+                <div className="col-span-2 sm:col-span-3">
+                  <label className="mb-1 block text-xs font-medium text-fg/50">
+                    Tags
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((t) => {
+                      const active = selectedTags.includes(t.id);
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => toggleTag(t.id)}
+                          className={`rounded-full px-3 py-1 text-xs transition ${
+                            active
+                              ? "btn-gradient text-black"
+                              : "border border-fg/10 bg-fg/5 text-fg/60 hover:bg-fg/10"
+                          }`}
+                        >
+                          {t.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="col-span-2 sm:col-span-3">
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="btn-gradient rounded-lg px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
+                >
+                  Adicionar transação
+                </motion.button>
+              </div>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
 
       <div className="glass mb-6 flex flex-wrap items-end gap-3 rounded-2xl p-4">
         <div>
@@ -351,16 +442,19 @@ export function Transactions() {
           />
         </div>
 
-        <div className="flex-1 min-w-32">
+        <div className="min-w-32 flex-1">
           <label className="mb-1 block text-xs font-medium text-fg/40">
             Buscar
           </label>
-          <input
-            value={filters.search ?? ""}
-            onChange={(e) => updateFilter("search", e.target.value)}
-            placeholder="Descrição..."
-            className={`w-full ${selectClass}`}
-          />
+          <div className="relative">
+            <IconSearch className="pointer-events-none absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2 text-fg/30" />
+            <input
+              value={filters.search ?? ""}
+              onChange={(e) => updateFilter("search", e.target.value)}
+              placeholder="Descrição..."
+              className={`w-full pl-7 ${selectClass}`}
+            />
+          </div>
         </div>
 
         {hasActiveFilters && (
@@ -379,71 +473,93 @@ export function Transactions() {
       )}
 
       {!transactionsQuery.isLoading && transactions.length === 0 && (
-        <p className="text-fg/40">Nenhuma transação encontrada.</p>
+        <div className="glass rounded-2xl p-10 text-center">
+          <p className="text-sm text-fg/40">Nenhuma transação encontrada.</p>
+        </div>
       )}
 
       <div className="glass overflow-hidden rounded-2xl">
         <AnimatePresence initial={false}>
-          {transactions.map((t, i) => (
-            <motion.div
-              key={t.id}
-              layout
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 12 }}
-              transition={{ duration: 0.25, delay: i * 0.02 }}
-              className="flex items-center justify-between border-b border-fg/5 px-5 py-3.5 last:border-b-0 hover:bg-fg/[0.03]"
-            >
-              <div>
-                <p className="font-medium text-fg/90">
-                  {t.description || "(sem descrição)"}
-                </p>
-                <p className="text-xs text-fg/40">
-                  {t.date}
-                  {t.category &&
-                    ` · ${categories.find((c) => c.id === t.category)?.name ?? ""}`}
-                  {!t.category && categorizeFeedback[t.id] && (
-                    <span className="text-accent-cyan">
-                      {" "}
-                      · sugestão: {categorizeFeedback[t.id]}
-                    </span>
+          {transactions.map((t, i) => {
+            const category = t.category ? categoryById.get(t.category) : undefined;
+            const initial =
+              t.type === "transfer" ? null : (category?.name ?? t.description ?? "?")
+                .trim()
+                .charAt(0)
+                .toUpperCase() || "?";
+
+            return (
+              <motion.div
+                key={t.id}
+                layout
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{ duration: 0.25, delay: i * 0.02 }}
+                className="group flex flex-col gap-2 border-b border-fg/5 px-5 py-3.5 last:border-b-0 hover:bg-fg/[0.03] sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-black"
+                    style={{ backgroundColor: avatarColor(category) }}
+                  >
+                    {t.type === "transfer" ? (
+                      <IconSwap className="h-4 w-4" />
+                    ) : (
+                      initial
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-fg/90">
+                      {t.description || "(sem descrição)"}
+                    </p>
+                    <p className="truncate text-xs text-fg/40">
+                      {t.date}
+                      {category && ` · ${category.name}`}
+                      {!t.category && t.type !== "transfer" && categorizeFeedback[t.id] && (
+                        <span className="text-accent-cyan">
+                          {" "}
+                          · sugestão: {categorizeFeedback[t.id]}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex w-full flex-wrap items-center justify-end gap-3 sm:w-auto sm:flex-nowrap sm:shrink-0">
+                  {!t.category && t.type !== "transfer" && (
+                    <button
+                      type="button"
+                      onClick={() => categorizeMutation.mutate(t.id)}
+                      disabled={categorizeMutation.isPending}
+                      title="Sugerir categoria com IA"
+                      className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-fg/40 transition hover:bg-fg/10 hover:text-accent-cyan disabled:opacity-40"
+                    >
+                      <IconSpark className="h-3.5 w-3.5" />
+                      {categorizeMutation.isPending &&
+                      categorizeMutation.variables === t.id
+                        ? "..."
+                        : "Categorizar"}
+                    </button>
                   )}
-                </p>
-              </div>
-              <div className="flex items-center gap-4">
-                {!t.category && (
+                  <span
+                    className={`font-display font-semibold whitespace-nowrap ${
+                      t.type === "expense" ? "text-pink-400" : "text-emerald-400"
+                    }`}
+                  >
+                    {t.type === "expense" ? "-" : "+"}
+                    {currency.format(Number(t.amount))}
+                  </span>
                   <button
                     type="button"
-                    onClick={() => categorizeMutation.mutate(t.id)}
-                    disabled={categorizeMutation.isPending}
-                    title="Sugerir categoria com IA"
-                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-fg/40 transition hover:bg-fg/10 hover:text-accent-cyan disabled:opacity-40"
+                    onClick={() => deleteMutation.mutate(t.id)}
+                    className="rounded-md p-1.5 text-fg/20 opacity-60 transition group-hover:opacity-100 hover:bg-fg/10 hover:text-pink-400 sm:opacity-0 sm:group-hover:opacity-100"
                   >
-                    <IconSpark className="h-3.5 w-3.5" />
-                    {categorizeMutation.isPending &&
-                    categorizeMutation.variables === t.id
-                      ? "..."
-                      : "Categorizar"}
+                    <IconTrash className="h-4 w-4" />
                   </button>
-                )}
-                <span
-                  className={`font-display font-semibold ${
-                    t.type === "expense" ? "text-pink-400" : "text-emerald-400"
-                  }`}
-                >
-                  {t.type === "expense" ? "-" : "+"}
-                  {currency.format(Number(t.amount))}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => deleteMutation.mutate(t.id)}
-                  className="rounded-md p-1.5 text-fg/30 transition hover:bg-fg/10 hover:text-pink-400"
-                >
-                  <IconTrash className="h-4 w-4" />
-                </button>
-              </div>
-            </motion.div>
-          ))}
+                </div>
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
       </div>
     </Layout>
