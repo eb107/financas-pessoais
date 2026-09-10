@@ -78,6 +78,49 @@ def test_me_returns_current_user_via_real_jwt_token(api_client, user):
     assert response.data["username"] == user.username
 
 
+def test_delete_account_requires_authentication(api_client):
+    response = api_client.delete("/api/auth/me/")
+    assert response.status_code == 401
+
+
+def test_delete_account_cascades_to_personal_data(auth_client, user):
+    """Direito de exclusão (LGPD Art. 18): apagar a conta precisa apagar
+    junto todo o dado pessoal associado, não deixar nada órfão pra trás."""
+    from apps.accounts.models import User
+    from apps.wallets.models import Wallet
+
+    wallet = Wallet.objects.create(user=user, name="Nubank")
+
+    response = auth_client.delete("/api/auth/me/")
+
+    assert response.status_code == 204
+    assert not User.objects.filter(id=user.id).exists()
+    assert not Wallet.objects.filter(id=wallet.id).exists()
+
+
+def test_export_requires_authentication(api_client):
+    response = api_client.get("/api/auth/me/export/")
+    assert response.status_code == 401
+
+
+def test_export_returns_only_the_authenticated_users_own_data(
+    auth_client, user, other_user
+):
+    """Direito de portabilidade (LGPD Art. 18): exportar precisa trazer só
+    o dado do próprio usuário, nunca vazar dado de outro."""
+    from apps.wallets.models import Wallet
+
+    Wallet.objects.create(user=user, name="Minha carteira")
+    Wallet.objects.create(user=other_user, name="Carteira do bob")
+
+    response = auth_client.get("/api/auth/me/export/")
+
+    assert response.status_code == 200
+    assert response.data["user"]["username"] == user.username
+    wallet_names = [w["name"] for w in response.data["wallets"]]
+    assert wallet_names == ["Minha carteira"]
+
+
 def test_login_is_rate_limited_after_too_many_attempts(api_client, user):
     """Proteção contra força bruta: settings.DEFAULT_THROTTLE_RATES["auth"]
     = "5/min". A 6ª tentativa (independente de acertar a senha) deve ser
