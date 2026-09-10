@@ -32,6 +32,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    const refresh = authStorage.getRefresh();
+    if (refresh) {
+      // Revoga o token no servidor (blacklist); não bloqueia a limpeza
+      // local caso a chamada falhe (ex: já expirado, sem rede).
+      authApi.logout(refresh).catch(() => {});
+    }
     authStorage.clear();
     setUser(null);
   }

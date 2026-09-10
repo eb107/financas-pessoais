@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "apps.accounts",
     "apps.common",
@@ -149,6 +150,10 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "ai": "30/day",
         "ai_chat": "50/day",
+        # Login/registro/refresh são pré-autenticação (throttle por IP via
+        # AnonRateThrottle) — protege contra força bruta de senha e
+        # enumeração/spam de contas.
+        "auth": "5/min",
     },
 }
 
@@ -156,6 +161,9 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
+    # Sem isto, o refresh token antigo continua válido mesmo depois de
+    # rotacionado — um token vazado nunca seria de fato revogado.
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 
