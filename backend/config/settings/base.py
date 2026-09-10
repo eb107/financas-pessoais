@@ -196,6 +196,12 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.ai_insights.tasks.generate_insights_for_all_users",
         "schedule": crontab(hour=8, minute=0),
     },
+    # Retenção de dados (LGPD Art. 15/16) — roda 1x/mês, todo dia 1 às
+    # 03:00 UTC. Ver apps/common/management/commands/purge_old_data.py.
+    "purge-old-data-monthly": {
+        "task": "apps.common.tasks.purge_old_data_task",
+        "schedule": crontab(hour=3, minute=0, day_of_month=1),
+    },
 }
 
 

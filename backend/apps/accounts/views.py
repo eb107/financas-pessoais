@@ -5,6 +5,8 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from apps.common.models import AuditLog
+
 from .data_export import build_user_data_export
 from .serializers import RegisterSerializer, UserSerializer
 from .throttles import AuthRateThrottle
@@ -61,6 +63,17 @@ class MeView(generics.RetrieveDestroyAPIView):
     def get_object(self):
         return self.request.user
 
+    def perform_destroy(self, instance):
+        # Registrado ANTES do delete, e com SET_NULL no FK do AuditLog:
+        # a evidência de que a conta foi excluída precisa sobreviver à
+        # própria exclusão da conta.
+        AuditLog.objects.create(
+            user=instance,
+            username=instance.username,
+            action=AuditLog.Action.ACCOUNT_DELETION,
+        )
+        instance.delete()
+
 
 class MeExportView(APIView):
     """Exporta todos os dados pessoais do usuário autenticado num JSON só
@@ -69,4 +82,9 @@ class MeExportView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        AuditLog.objects.create(
+            user=request.user,
+            username=request.user.username,
+            action=AuditLog.Action.DATA_EXPORT,
+        )
         return Response(build_user_data_export(request.user))

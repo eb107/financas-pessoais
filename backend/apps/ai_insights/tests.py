@@ -131,6 +131,70 @@ def test_generate_insights_task_creates_insight_from_raw_pattern(
     assert "Alimentação" in insight.title
 
 
+@override_settings(ANTHROPIC_API_KEY="fake-key-for-test")
+def test_generate_insights_task_skips_ai_without_user_consent(
+    user, wallet, category, monkeypatch
+):
+    """Sem ai_consent_given_at, a rotina automática (Celery beat) não pode
+    ser o primeiro contato do usuário com o processamento por terceiro —
+    mesmo com ANTHROPIC_API_KEY configurada, não deve chamar a IA."""
+    today = date.today()
+    Budget.objects.create(
+        user=user, category=category, month=today.replace(day=1), amount_limit=100
+    )
+    Transaction.objects.create(
+        wallet=wallet, category=category, amount=150, type="expense", date=today
+    )
+    called = {}
+
+    def fake_generate_insight_texts(raw_patterns):
+        called["yes"] = True
+        return ["texto gerado por ia"]
+
+    monkeypatch.setattr(
+        "apps.ai_insights.tasks.generate_insight_texts", fake_generate_insight_texts
+    )
+
+    generate_insights_task(user.id)
+
+    assert "yes" not in called
+    insight = Insight.objects.get(user=user)
+    assert insight.body == insight.data_snapshot["raw"]
+
+
+@override_settings(ANTHROPIC_API_KEY="fake-key-for-test")
+def test_generate_insights_task_uses_ai_after_consent_given(
+    user, wallet, category, monkeypatch
+):
+    user.record_ai_consent()
+    today = date.today()
+    Budget.objects.create(
+        user=user, category=category, month=today.replace(day=1), amount_limit=100
+    )
+    Transaction.objects.create(
+        wallet=wallet, category=category, amount=150, type="expense", date=today
+    )
+
+    monkeypatch.setattr(
+        "apps.ai_insights.tasks.generate_insight_texts",
+        lambda raw_patterns: ["texto gerado por ia"],
+    )
+
+    generate_insights_task(user.id)
+
+    insight = Insight.objects.get(user=user)
+    assert insight.body == "texto gerado por ia"
+
+
+def test_trigger_insights_view_records_ai_consent(auth_client, user):
+    assert user.ai_consent_given_at is None
+
+    auth_client.post("/api/ai/insights/generate/")
+
+    user.refresh_from_db()
+    assert user.ai_consent_given_at is not None
+
+
 def test_insight_list_only_returns_own_insights(auth_client, user, other_user):
     Insight.objects.create(
         user=user, type="budget_exceeded", title="Minha", body="...", severity="warning"

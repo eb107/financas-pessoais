@@ -23,7 +23,11 @@ def generate_insights_task(user_id: int) -> int:
         return 0
 
     texts = [p["raw"] for p in patterns]
-    if settings.ANTHROPIC_API_KEY:
+    # Só chama a IA se o usuário já deu consentimento em algum momento (ex:
+    # usou o chat ou a categorização por IA antes) — a rotina automática do
+    # Celery beat não pode ser o primeiro contato de um usuário com o
+    # processamento de dados por terceiro (LGPD Art. 18, IX).
+    if settings.ANTHROPIC_API_KEY and user.ai_consent_given_at:
         try:
             texts = generate_insight_texts([p["raw"] for p in patterns])
         except anthropic.APIError:

@@ -35,5 +35,6 @@ class TriggerInsightsView(APIView):
     throttle_classes = [AICategorizationThrottle]
 
     def post(self, request):
+        request.user.record_ai_consent()
         task = generate_insights_task.delay(request.user.id)
         return Response({"task_id": task.id, "status": "queued"}, status=202)
