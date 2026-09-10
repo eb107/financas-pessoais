@@ -23,9 +23,24 @@ docker compose up -d --build
 
 3. Backend disponível em `http://localhost:8000` (health-check em `/api/health/`), frontend em `http://localhost:5173`.
 
+## Testes
+
+```bash
+# Backend
+cd backend && uv run pytest
+
+# Frontend
+cd frontend && npm test
+```
+
+CI (`.github/workflows/ci.yml`) roda lint + testes de backend e frontend em
+paralelo a cada push/PR. Ver [`docs/architecture.md`](docs/architecture.md)
+para a visão geral da arquitetura e [`docs/adr/`](docs/adr/) para as
+decisões com trade-offs relevantes.
+
 ## Status
 
-🚧 Em construção — Fase 8 (testes, CI e polish final).
+✅ Completo — Fase 8 (testes, CI e polish final).
 
 ## Roadmap
 
@@ -37,4 +52,4 @@ docker compose up -d --build
 - [x] Fase 5 — Previsão de gastos (IA)
 - [x] Fase 6 — Chat assistente (IA)
 - [x] Fase 7 — Insights e alertas automáticos (IA)
-- [ ] Fase 8 — Testes, CI e polish final
+- [x] Fase 8 — Testes, CI e polish final

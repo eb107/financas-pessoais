@@ -19,6 +19,12 @@ build/
 # Docker
 *.log
 
+# Testes
+.coverage
+htmlcov/
+.pytest_cache/
+coverage/
+
 # Editor / SO
 .vscode/
 .idea/

@@ -30,9 +30,7 @@ class SummaryView(APIView):
             qs = qs.filter(date__lte=date_to)
 
         income = qs.filter(type="income").aggregate(total=Sum("amount"))["total"] or 0
-        expense = (
-            qs.filter(type="expense").aggregate(total=Sum("amount"))["total"] or 0
-        )
+        expense = qs.filter(type="expense").aggregate(total=Sum("amount"))["total"] or 0
 
         return Response(
             {

@@ -39,6 +39,28 @@ class BudgetSerializer(serializers.ModelSerializer):
             Q(user=request.user) | Q(user__isnull=True)
         )
 
+    def validate(self, attrs):
+        """Traduz a UniqueConstraint (user, category, month) do model num erro
+        400 limpo. Sem isso, uma duplicata vaza como IntegrityError (500) —
+        o DRF não gera o validador automático aqui porque "user" não é um
+        campo do serializer (é injetado depois, em perform_create)."""
+        request = self.context.get("request")
+        category = attrs.get("category", getattr(self.instance, "category", None))
+        month = attrs.get("month", getattr(self.instance, "month", None))
+
+        if request and category and month:
+            qs = Budget.objects.filter(
+                user=request.user, category=category, month=month
+            )
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError(
+                    "Já existe um orçamento para essa categoria neste mês."
+                )
+
+        return attrs
+
     def _spent(self, obj) -> float:
         if obj.pk not in self._spent_cache:
             total = Transaction.objects.filter(

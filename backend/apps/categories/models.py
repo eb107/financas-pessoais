@@ -33,6 +33,7 @@ class Category(TimeStampedModel):
 
     class Meta:
         verbose_name_plural = "categories"
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
@@ -43,6 +44,9 @@ class Tag(TimeStampedModel):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tags"
     )
     name = models.CharField(max_length=50)
+
+    class Meta:
+        ordering = ["name"]
 
     def __str__(self):
         return self.name
