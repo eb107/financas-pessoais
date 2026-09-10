@@ -55,7 +55,7 @@ function ChartTooltip({
   if (!active || !payload?.length) return null;
   return (
     <div className="glass-strong rounded-lg px-3 py-2 text-xs shadow-xl">
-      {label && <p className="mb-1 font-medium text-white/70">{label}</p>}
+      {label && <p className="mb-1 font-medium text-fg/70">{label}</p>}
       {payload.map((p) => (
         <p key={p.name} style={{ color: p.color }}>
           {p.name}: {currency.format(p.value)}
@@ -125,7 +125,7 @@ export function Dashboard() {
     {
       label: "Transações",
       value: summary?.transaction_count ?? 0,
-      tone: "text-white",
+      tone: "text-fg",
       isCount: true,
     },
   ];
@@ -133,7 +133,7 @@ export function Dashboard() {
   return (
     <Layout>
       <h1 className="font-display mb-1 text-3xl font-bold">Dashboard</h1>
-      <p className="mb-6 text-sm text-white/50">
+      <p className="mb-6 text-sm text-fg/50">
         Visão geral das suas finanças nos últimos 6 meses.
       </p>
 
@@ -146,7 +146,7 @@ export function Dashboard() {
             transition={{ duration: 0.4, delay: i * 0.06 }}
             className="glass rounded-2xl p-5"
           >
-            <p className="text-xs font-medium tracking-wide text-white/40 uppercase">
+            <p className="text-xs font-medium tracking-wide text-fg/40 uppercase">
               {s.label}
             </p>
             <p className={`font-display mt-2 text-2xl font-bold ${s.tone}`}>
@@ -167,7 +167,7 @@ export function Dashboard() {
             Fluxo de caixa
           </h2>
           {cashflow.length === 0 ? (
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-fg/40">
               Sem dados suficientes ainda.
             </p>
           ) : (
@@ -233,7 +233,7 @@ export function Dashboard() {
             Gastos por categoria
           </h2>
           {categories.length === 0 ? (
-            <p className="text-sm text-white/40">
+            <p className="text-sm text-fg/40">
               Sem despesas registradas ainda.
             </p>
           ) : (
@@ -257,7 +257,7 @@ export function Dashboard() {
                   content={({ active, payload }) =>
                     active && payload?.length ? (
                       <div className="glass-strong rounded-lg px-3 py-2 text-xs shadow-xl">
-                        <p className="text-white/80">
+                        <p className="text-fg/80">
                           {currency.format(payload[0].value as number)}
                         </p>
                       </div>
@@ -290,7 +290,7 @@ export function Dashboard() {
             <h2 className="font-display text-lg font-semibold">
               Previsão de gastos
             </h2>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-fg/40">
               Estimativa pro próximo mês, por categoria (regressão linear
               sobre o histórico).
             </p>
@@ -308,16 +308,16 @@ export function Dashboard() {
         </div>
 
         {totalForecast && (
-          <p className="mb-3 text-sm text-white/70">
+          <p className="mb-3 text-sm text-fg/70">
             Total previsto:{" "}
-            <span className="font-display font-semibold text-white">
+            <span className="font-display font-semibold text-fg">
               {currency.format(Number(totalForecast.predicted_amount))}
             </span>
           </p>
         )}
 
         {categoryForecasts.length === 0 && !isGenerating && (
-          <p className="text-sm text-white/40">
+          <p className="text-sm text-fg/40">
             Nenhuma previsão gerada ainda — clique em "Gerar previsão"
             (precisa de pelo menos 3 meses de histórico por categoria).
           </p>
@@ -327,12 +327,12 @@ export function Dashboard() {
           {categoryForecasts.map((f) => (
             <div
               key={f.id}
-              className="rounded-xl border border-white/5 bg-white/[0.03] p-3"
+              className="rounded-xl border border-fg/5 bg-fg/[0.03] p-3"
             >
-              <p className="truncate text-xs text-white/40">
+              <p className="truncate text-xs text-fg/40">
                 {f.category_name}
               </p>
-              <p className="font-display text-sm font-semibold text-white/90">
+              <p className="font-display text-sm font-semibold text-fg/90">
                 {currency.format(Number(f.predicted_amount))}
               </p>
             </div>

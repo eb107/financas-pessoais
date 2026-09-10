@@ -8,7 +8,7 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="relative flex min-h-screen items-center justify-center text-white/40">
+      <div className="relative flex min-h-screen items-center justify-center text-fg/40">
         <GlowBackground />
         Carregando...
       </div>

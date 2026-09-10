@@ -83,12 +83,12 @@ export function Settings() {
   });
 
   const inputClass =
-    "rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-accent-cyan/60";
+    "rounded-lg border border-fg/10 bg-fg/5 px-3 py-1.5 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60";
 
   return (
     <Layout>
       <h1 className="font-display mb-1 text-3xl font-bold">Configurações</h1>
-      <p className="mb-8 text-sm text-white/50">
+      <p className="mb-8 text-sm text-fg/50">
         Gerencie suas carteiras e categorias.
       </p>
 
@@ -111,7 +111,7 @@ export function Settings() {
               initial_balance: "0",
             });
           }}
-          className="mb-4 flex gap-2"
+          className="mb-4 flex flex-col gap-2 sm:flex-row"
         >
           <input
             value={walletName}
@@ -146,7 +146,7 @@ export function Settings() {
           </motion.button>
         </form>
 
-        <div className="divide-y divide-white/5 overflow-hidden rounded-lg border border-white/5">
+        <div className="divide-y divide-fg/5 overflow-hidden rounded-lg border border-fg/5">
           <AnimatePresence initial={false}>
             {(walletsQuery.data ?? []).map((w) => (
               <motion.div
@@ -155,16 +155,16 @@ export function Settings() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-white/[0.03]"
+                className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-fg/[0.03]"
               >
-                <span className="text-white/80">
+                <span className="text-fg/80">
                   {w.name}{" "}
-                  <span className="text-xs text-white/30">({w.type})</span>
+                  <span className="text-xs text-fg/30">({w.type})</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => deleteWalletMutation.mutate(w.id)}
-                  className="rounded-md p-1.5 text-white/30 transition hover:bg-white/10 hover:text-pink-400"
+                  className="rounded-md p-1.5 text-fg/30 transition hover:bg-fg/10 hover:text-pink-400"
                 >
                   <IconTrash className="h-3.5 w-3.5" />
                 </button>
@@ -172,7 +172,7 @@ export function Settings() {
             ))}
           </AnimatePresence>
           {(walletsQuery.data ?? []).length === 0 && (
-            <p className="px-4 py-3 text-sm text-white/40">
+            <p className="px-4 py-3 text-sm text-fg/40">
               Nenhuma carteira ainda.
             </p>
           )}
@@ -196,7 +196,7 @@ export function Settings() {
               kind: categoryKind,
             });
           }}
-          className="mb-4 flex gap-2"
+          className="mb-4 flex flex-col gap-2 sm:flex-row"
         >
           <input
             value={categoryName}
@@ -225,7 +225,7 @@ export function Settings() {
           </motion.button>
         </form>
 
-        <div className="divide-y divide-white/5 overflow-hidden rounded-lg border border-white/5">
+        <div className="divide-y divide-fg/5 overflow-hidden rounded-lg border border-fg/5">
           <AnimatePresence initial={false}>
             {(categoriesQuery.data ?? []).map((c) => (
               <motion.div
@@ -234,16 +234,16 @@ export function Settings() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-white/[0.03]"
+                className="flex items-center justify-between px-4 py-2.5 text-sm hover:bg-fg/[0.03]"
               >
-                <span className="text-white/80">
+                <span className="text-fg/80">
                   {c.name}{" "}
-                  <span className="text-xs text-white/30">({c.kind})</span>
+                  <span className="text-xs text-fg/30">({c.kind})</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => deleteCategoryMutation.mutate(c.id)}
-                  className="rounded-md p-1.5 text-white/30 transition hover:bg-white/10 hover:text-pink-400"
+                  className="rounded-md p-1.5 text-fg/30 transition hover:bg-fg/10 hover:text-pink-400"
                 >
                   <IconTrash className="h-3.5 w-3.5" />
                 </button>
@@ -251,7 +251,7 @@ export function Settings() {
             ))}
           </AnimatePresence>
           {(categoriesQuery.data ?? []).length === 0 && (
-            <p className="px-4 py-3 text-sm text-white/40">
+            <p className="px-4 py-3 text-sm text-fg/40">
               Nenhuma categoria ainda.
             </p>
           )}
@@ -265,7 +265,7 @@ export function Settings() {
         className="glass mt-8 rounded-2xl p-6"
       >
         <h2 className="font-display mb-4 text-lg font-semibold">Tags</h2>
-        <p className="mb-4 text-xs text-white/40">
+        <p className="mb-4 text-xs text-fg/40">
           Use tags pra marcar transações com rótulos livres (ex: "reembolsável",
           "viagem"), além da categoria.
         </p>
@@ -276,7 +276,7 @@ export function Settings() {
             if (!tagName.trim()) return;
             createTagMutation.mutate({ name: tagName });
           }}
-          className="mb-4 flex gap-2"
+          className="mb-4 flex flex-col gap-2 sm:flex-row"
         >
           <input
             value={tagName}
@@ -302,13 +302,13 @@ export function Settings() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
-                className="glass-strong flex items-center gap-2 rounded-full px-3 py-1 text-xs text-white/80"
+                className="glass-strong flex items-center gap-2 rounded-full px-3 py-1 text-xs text-fg/80"
               >
                 {t.name}
                 <button
                   type="button"
                   onClick={() => deleteTagMutation.mutate(t.id)}
-                  className="text-white/30 hover:text-pink-400"
+                  className="text-fg/30 hover:text-pink-400"
                 >
                   <IconTrash className="h-3 w-3" />
                 </button>
@@ -316,7 +316,7 @@ export function Settings() {
             ))}
           </AnimatePresence>
           {(tagsQuery.data ?? []).length === 0 && (
-            <p className="text-sm text-white/40">Nenhuma tag ainda.</p>
+            <p className="text-sm text-fg/40">Nenhuma tag ainda.</p>
           )}
         </div>
       </motion.section>
@@ -333,7 +333,7 @@ export function Settings() {
 
         {meQuery.data?.ai_consent_given_at ? (
           <>
-            <p className="mb-4 text-sm text-white/70">
+            <p className="mb-4 text-sm text-fg/70">
               Você autorizou o uso de funcionalidades de IA em{" "}
               {new Date(meQuery.data.ai_consent_given_at).toLocaleString(
                 "pt-BR",
@@ -356,13 +356,13 @@ export function Settings() {
             </motion.button>
           </>
         ) : (
-          <p className="mb-4 text-sm text-white/50">
+          <p className="mb-4 text-sm text-fg/50">
             Você ainda não usou nenhuma funcionalidade de IA (categorização,
             chat ou insights) — nenhum dado seu foi enviado a terceiros.
           </p>
         )}
 
-        <p className="mt-4 text-xs text-white/40">
+        <p className="mt-4 text-xs text-fg/40">
           Veja o{" "}
           <Link to="/privacidade" className="text-accent-cyan hover:underline">
             Aviso de Privacidade completo

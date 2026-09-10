@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { GlowBackground } from "../components/GlowBackground";
+import { ThemeToggle } from "../components/ThemeToggle";
 import { useAuth } from "../features/auth/useAuth";
 
 const schema = z.object({
@@ -39,6 +40,9 @@ export function Register() {
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4">
       <GlowBackground />
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
 
       <motion.form
         initial={{ opacity: 0, y: 24 }}
@@ -48,17 +52,17 @@ export function Register() {
         className="glass-strong w-full max-w-sm rounded-2xl p-8 shadow-2xl"
       >
         <h1 className="font-display mb-1 text-3xl font-bold">Criar conta</h1>
-        <p className="mb-6 text-sm text-white/50">
+        <p className="mb-6 text-sm text-fg/50">
           Comece a organizar suas finanças em minutos.
         </p>
 
-        <label className="mb-1 block text-sm font-medium text-white/70">
+        <label className="mb-1 block text-sm font-medium text-fg/70">
           Usuário
         </label>
         <input
           {...register("username")}
           autoComplete="username"
-          className="mb-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/30 outline-none transition focus:border-accent-cyan/60 focus:ring-2 focus:ring-accent-cyan/20"
+          className="mb-1 w-full rounded-lg border border-fg/10 bg-fg/5 px-3 py-2 text-fg placeholder-fg/30 outline-none transition focus:border-accent-cyan/60 focus:ring-2 focus:ring-accent-cyan/20"
         />
         {errors.username && (
           <p className="mb-2 text-sm text-pink-400">
@@ -66,26 +70,26 @@ export function Register() {
           </p>
         )}
 
-        <label className="mt-3 mb-1 block text-sm font-medium text-white/70">
+        <label className="mt-3 mb-1 block text-sm font-medium text-fg/70">
           E-mail
         </label>
         <input
           {...register("email")}
           autoComplete="email"
-          className="mb-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/30 outline-none transition focus:border-accent-cyan/60 focus:ring-2 focus:ring-accent-cyan/20"
+          className="mb-1 w-full rounded-lg border border-fg/10 bg-fg/5 px-3 py-2 text-fg placeholder-fg/30 outline-none transition focus:border-accent-cyan/60 focus:ring-2 focus:ring-accent-cyan/20"
         />
         {errors.email && (
           <p className="mb-2 text-sm text-pink-400">{errors.email.message}</p>
         )}
 
-        <label className="mt-3 mb-1 block text-sm font-medium text-white/70">
+        <label className="mt-3 mb-1 block text-sm font-medium text-fg/70">
           Senha
         </label>
         <input
           type="password"
           {...register("password")}
           autoComplete="new-password"
-          className="mb-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/30 outline-none transition focus:border-accent-cyan/60 focus:ring-2 focus:ring-accent-cyan/20"
+          className="mb-1 w-full rounded-lg border border-fg/10 bg-fg/5 px-3 py-2 text-fg placeholder-fg/30 outline-none transition focus:border-accent-cyan/60 focus:ring-2 focus:ring-accent-cyan/20"
         />
         {errors.password && (
           <p className="mb-2 text-sm text-pink-400">
@@ -112,14 +116,14 @@ export function Register() {
           {isSubmitting ? "Criando..." : "Criar conta"}
         </motion.button>
 
-        <p className="mt-5 text-center text-sm text-white/50">
+        <p className="mt-5 text-center text-sm text-fg/50">
           Já tem conta?{" "}
           <Link to="/login" className="text-accent-cyan hover:underline">
             Entrar
           </Link>
         </p>
 
-        <p className="mt-3 text-center text-xs text-white/30">
+        <p className="mt-3 text-center text-xs text-fg/30">
           Ao criar sua conta, você concorda com nosso{" "}
           <Link to="/privacidade" className="text-accent-cyan hover:underline">
             Aviso de Privacidade

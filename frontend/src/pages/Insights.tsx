@@ -56,7 +56,7 @@ export function Insights() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-display mb-1 text-3xl font-bold">Insights</h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-fg/50">
             Alertas automáticos sobre padrões nos seus gastos. Gerados
             automaticamente 1x por dia, ou quando você quiser.
           </p>
@@ -75,8 +75,8 @@ export function Insights() {
 
       {insights.length === 0 && !isGenerating && (
         <div className="glass flex flex-col items-center gap-2 rounded-2xl p-10 text-center">
-          <IconBell className="h-8 w-8 text-white/20" />
-          <p className="text-sm text-white/40">
+          <IconBell className="h-8 w-8 text-fg/20" />
+          <p className="text-sm text-fg/40">
             Nenhum insight ainda — clique em "Gerar agora" ou aguarde a
             rotina diária.
           </p>
@@ -99,15 +99,15 @@ export function Insights() {
               className={`glass cursor-pointer rounded-xl border-l-4 p-4 ${SEVERITY_STYLES[insight.severity]}`}
             >
               <div className="mb-1 flex items-center justify-between gap-2">
-                <p className="font-display text-sm font-semibold text-white/90">
+                <p className="font-display text-sm font-semibold text-fg/90">
                   {insight.title}
                 </p>
-                <span className="shrink-0 text-[10px] tracking-wide text-white/30 uppercase">
+                <span className="shrink-0 text-[10px] tracking-wide text-fg/30 uppercase">
                   {SEVERITY_LABELS[insight.severity]}
                 </span>
               </div>
-              <p className="text-sm text-white/60">{insight.body}</p>
-              <p className="mt-2 text-[11px] text-white/25">
+              <p className="text-sm text-fg/60">{insight.body}</p>
+              <p className="mt-2 text-[11px] text-fg/25">
                 {new Date(insight.generated_at).toLocaleDateString("pt-BR", {
                   day: "2-digit",
                   month: "short",

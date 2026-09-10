@@ -55,7 +55,7 @@ export function Budgets() {
   return (
     <Layout>
       <h1 className="font-display mb-1 text-3xl font-bold">Orçamentos</h1>
-      <p className="mb-6 text-sm text-white/50">
+      <p className="mb-6 text-sm text-fg/50">
         Defina limites mensais por categoria e acompanhe o progresso.
       </p>
 
@@ -75,13 +75,13 @@ export function Budgets() {
         className="glass mb-8 flex flex-wrap items-end gap-3 rounded-2xl p-5"
       >
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/50">
+          <label className="mb-1 block text-xs font-medium text-fg/50">
             Categoria
           </label>
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
+            className="rounded-lg border border-fg/10 bg-fg/5 px-3 py-1.5 text-sm text-fg outline-none focus:border-accent-cyan/60"
           >
             <option value="" className="bg-surface">
               Selecione
@@ -95,14 +95,14 @@ export function Budgets() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/50">
+          <label className="mb-1 block text-xs font-medium text-fg/50">
             Limite mensal
           </label>
           <input
             value={amountLimit}
             onChange={(e) => setAmountLimit(e.target.value)}
             placeholder="0.00"
-            className="w-32 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-accent-cyan/60"
+            className="w-32 rounded-lg border border-fg/10 bg-fg/5 px-3 py-1.5 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60"
           />
         </div>
 
@@ -114,13 +114,13 @@ export function Budgets() {
           Criar orçamento
         </motion.button>
 
-        <span className="text-xs text-white/30">
+        <span className="text-xs text-fg/30">
           Mês atual: {currentMonth().slice(0, 7)}
         </span>
       </motion.form>
 
       {budgets.length === 0 && (
-        <p className="text-sm text-white/40">Nenhum orçamento este mês.</p>
+        <p className="text-sm text-fg/40">Nenhum orçamento este mês.</p>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -137,10 +137,10 @@ export function Budgets() {
             >
               <div className="mb-2 flex items-start justify-between">
                 <div>
-                  <p className="font-medium text-white/90">
+                  <p className="font-medium text-fg/90">
                     {b.category_name}
                   </p>
-                  <p className="text-xs text-white/40">
+                  <p className="text-xs text-fg/40">
                     {currency.format(Number(b.spent))} de{" "}
                     {currency.format(Number(b.amount_limit))}
                   </p>
@@ -148,13 +148,13 @@ export function Budgets() {
                 <button
                   type="button"
                   onClick={() => deleteMutation.mutate(b.id)}
-                  className="rounded-md p-1.5 text-white/30 transition hover:bg-white/10 hover:text-pink-400"
+                  className="rounded-md p-1.5 text-fg/30 transition hover:bg-fg/10 hover:text-pink-400"
                 >
                   <IconTrash className="h-3.5 w-3.5" />
                 </button>
               </div>
 
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/5">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-fg/5">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(b.percentage, 100)}%` }}
@@ -164,7 +164,7 @@ export function Budgets() {
               </div>
               <p
                 className={`mt-1.5 text-xs font-medium ${
-                  b.percentage >= 100 ? "text-pink-400" : "text-white/40"
+                  b.percentage >= 100 ? "text-pink-400" : "text-fg/40"
                 }`}
               >
                 {b.percentage}% usado

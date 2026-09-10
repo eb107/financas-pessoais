@@ -34,7 +34,7 @@ const currency = new Intl.NumberFormat("pt-BR", {
 });
 
 const selectClass =
-  "w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60";
+  "w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg outline-none focus:border-accent-cyan/60";
 
 export function Transactions() {
   const queryClient = useQueryClient();
@@ -125,7 +125,7 @@ export function Transactions() {
   return (
     <Layout>
       <h1 className="font-display mb-1 text-3xl font-bold">Transações</h1>
-      <p className="mb-6 text-sm text-white/50">
+      <p className="mb-6 text-sm text-fg/50">
         Suas transações mais recentes — veja os totais no Dashboard.
       </p>
 
@@ -137,7 +137,7 @@ export function Transactions() {
         className="glass mb-6 grid grid-cols-2 gap-3 rounded-2xl p-5 sm:grid-cols-3"
       >
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/50">
+          <label className="mb-1 block text-xs font-medium text-fg/50">
             Carteira
           </label>
           <select {...register("wallet")} className={selectClass}>
@@ -156,7 +156,7 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/50">
+          <label className="mb-1 block text-xs font-medium text-fg/50">
             Categoria
           </label>
           <select {...register("category")} className={selectClass}>
@@ -172,7 +172,7 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/50">
+          <label className="mb-1 block text-xs font-medium text-fg/50">
             Tipo
           </label>
           <select {...register("type")} className={selectClass}>
@@ -189,13 +189,13 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/50">
+          <label className="mb-1 block text-xs font-medium text-fg/50">
             Valor
           </label>
           <input
             {...register("amount")}
             placeholder="0.00"
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-accent-cyan/60"
+            className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60"
           />
           {errors.amount && (
             <p className="text-xs text-pink-400">{errors.amount.message}</p>
@@ -203,29 +203,29 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/50">
+          <label className="mb-1 block text-xs font-medium text-fg/50">
             Data
           </label>
           <input
             type="date"
             {...register("date")}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white outline-none focus:border-accent-cyan/60"
+            className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg outline-none focus:border-accent-cyan/60"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/50">
+          <label className="mb-1 block text-xs font-medium text-fg/50">
             Descrição
           </label>
           <input
             {...register("description")}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-sm text-white placeholder-white/30 outline-none focus:border-accent-cyan/60"
+            className="w-full rounded-lg border border-fg/10 bg-fg/5 px-2 py-1.5 text-sm text-fg placeholder-fg/30 outline-none focus:border-accent-cyan/60"
           />
         </div>
 
         {tags.length > 0 && (
           <div className="col-span-2 sm:col-span-3">
-            <label className="mb-1 block text-xs font-medium text-white/50">
+            <label className="mb-1 block text-xs font-medium text-fg/50">
               Tags
             </label>
             <div className="flex flex-wrap gap-2">
@@ -239,7 +239,7 @@ export function Transactions() {
                     className={`rounded-full px-3 py-1 text-xs transition ${
                       active
                         ? "btn-gradient text-black"
-                        : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
+                        : "border border-fg/10 bg-fg/5 text-fg/60 hover:bg-fg/10"
                     }`}
                   >
                     {t.name}
@@ -264,7 +264,7 @@ export function Transactions() {
 
       <div className="glass mb-6 flex flex-wrap items-end gap-3 rounded-2xl p-4">
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/40">
+          <label className="mb-1 block text-xs font-medium text-fg/40">
             Carteira
           </label>
           <select
@@ -284,7 +284,7 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/40">
+          <label className="mb-1 block text-xs font-medium text-fg/40">
             Categoria
           </label>
           <select
@@ -304,7 +304,7 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/40">
+          <label className="mb-1 block text-xs font-medium text-fg/40">
             Tipo
           </label>
           <select
@@ -328,7 +328,7 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/40">
+          <label className="mb-1 block text-xs font-medium text-fg/40">
             De
           </label>
           <input
@@ -340,7 +340,7 @@ export function Transactions() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs font-medium text-white/40">
+          <label className="mb-1 block text-xs font-medium text-fg/40">
             Até
           </label>
           <input
@@ -352,7 +352,7 @@ export function Transactions() {
         </div>
 
         <div className="flex-1 min-w-32">
-          <label className="mb-1 block text-xs font-medium text-white/40">
+          <label className="mb-1 block text-xs font-medium text-fg/40">
             Buscar
           </label>
           <input
@@ -367,7 +367,7 @@ export function Transactions() {
           <button
             type="button"
             onClick={() => setFilters({})}
-            className="rounded-lg px-3 py-1.5 text-xs text-white/40 hover:text-pink-400"
+            className="rounded-lg px-3 py-1.5 text-xs text-fg/40 hover:text-pink-400"
           >
             Limpar filtros
           </button>
@@ -375,11 +375,11 @@ export function Transactions() {
       </div>
 
       {transactionsQuery.isLoading && (
-        <p className="text-white/40">Carregando transações...</p>
+        <p className="text-fg/40">Carregando transações...</p>
       )}
 
       {!transactionsQuery.isLoading && transactions.length === 0 && (
-        <p className="text-white/40">Nenhuma transação encontrada.</p>
+        <p className="text-fg/40">Nenhuma transação encontrada.</p>
       )}
 
       <div className="glass overflow-hidden rounded-2xl">
@@ -392,13 +392,13 @@ export function Transactions() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 12 }}
               transition={{ duration: 0.25, delay: i * 0.02 }}
-              className="flex items-center justify-between border-b border-white/5 px-5 py-3.5 last:border-b-0 hover:bg-white/[0.03]"
+              className="flex items-center justify-between border-b border-fg/5 px-5 py-3.5 last:border-b-0 hover:bg-fg/[0.03]"
             >
               <div>
-                <p className="font-medium text-white/90">
+                <p className="font-medium text-fg/90">
                   {t.description || "(sem descrição)"}
                 </p>
-                <p className="text-xs text-white/40">
+                <p className="text-xs text-fg/40">
                   {t.date}
                   {t.category &&
                     ` · ${categories.find((c) => c.id === t.category)?.name ?? ""}`}
@@ -417,7 +417,7 @@ export function Transactions() {
                     onClick={() => categorizeMutation.mutate(t.id)}
                     disabled={categorizeMutation.isPending}
                     title="Sugerir categoria com IA"
-                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-white/40 transition hover:bg-white/10 hover:text-accent-cyan disabled:opacity-40"
+                    className="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-fg/40 transition hover:bg-fg/10 hover:text-accent-cyan disabled:opacity-40"
                   >
                     <IconSpark className="h-3.5 w-3.5" />
                     {categorizeMutation.isPending &&
@@ -437,7 +437,7 @@ export function Transactions() {
                 <button
                   type="button"
                   onClick={() => deleteMutation.mutate(t.id)}
-                  className="rounded-md p-1.5 text-white/30 transition hover:bg-white/10 hover:text-pink-400"
+                  className="rounded-md p-1.5 text-fg/30 transition hover:bg-fg/10 hover:text-pink-400"
                 >
                   <IconTrash className="h-4 w-4" />
                 </button>
