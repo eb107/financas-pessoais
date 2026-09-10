@@ -20,3 +20,7 @@ export async function fetchMe() {
   const { data } = await api.get<User>("/api/auth/me/");
   return data;
 }
+
+export async function logout(refresh: string) {
+  await api.post("/api/auth/logout/", { refresh });
+}

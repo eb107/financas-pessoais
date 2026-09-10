@@ -71,6 +71,7 @@ describe("AuthProvider / useAuth", () => {
   it("logout clears tokens and resets the user", async () => {
     mockedAuthApi.login.mockResolvedValue({ access: "a", refresh: "r" });
     mockedAuthApi.fetchMe.mockResolvedValue(alice);
+    mockedAuthApi.logout.mockResolvedValue(undefined);
     const { result } = renderHook(() => useAuth(), { wrapper });
     await act(async () => {
       await result.current.login({ username: "alice", password: "s3nha" });
@@ -80,6 +81,7 @@ describe("AuthProvider / useAuth", () => {
       result.current.logout();
     });
 
+    expect(mockedAuthApi.logout).toHaveBeenCalledWith("r");
     expect(authStorage.getAccess()).toBeNull();
     expect(result.current.isAuthenticated).toBe(false);
     expect(result.current.user).toBeNull();
