@@ -20,10 +20,10 @@
      com opacidade direta; precisa do próprio valor por tema. Valores baixos
      de propósito — o painel deve se misturar com o fundo (estrelas/glow),
      não se destacar como um bloco sólido por cima dele. */
-  --glass-bg: rgba(255, 255, 255, 0.014);
-  --glass-bg-strong: rgba(255, 255, 255, 0.045);
-  --glass-border: rgba(255, 255, 255, 0.035);
-  --glass-border-strong: rgba(255, 255, 255, 0.09);
+  --glass-bg: rgba(255, 255, 255, 0.006);
+  --glass-bg-strong: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.018);
+  --glass-border-strong: rgba(255, 255, 255, 0.06);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
@@ -32,10 +32,10 @@
   --color-surface: #ffffff;
   --color-fg: #14151a;
 
-  --glass-bg: rgba(20, 21, 26, 0.012);
-  --glass-bg-strong: rgba(255, 255, 255, 0.55);
-  --glass-border: rgba(20, 21, 26, 0.035);
-  --glass-border-strong: rgba(20, 21, 26, 0.07);
+  --glass-bg: rgba(20, 21, 26, 0.005);
+  --glass-bg-strong: rgba(255, 255, 255, 0.4);
+  --glass-border: rgba(20, 21, 26, 0.018);
+  --glass-border-strong: rgba(20, 21, 26, 0.045);
   --glass-shadow: 0 8px 32px rgba(20, 21, 26, 0.06);
 }
 
@@ -62,8 +62,8 @@
 @layer components {
   .glass {
     background: var(--glass-bg);
-    backdrop-filter: blur(10px) saturate(1.1);
-    -webkit-backdrop-filter: blur(10px) saturate(1.1);
+    backdrop-filter: blur(6px) saturate(1.1);
+    -webkit-backdrop-filter: blur(6px) saturate(1.1);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
   }
