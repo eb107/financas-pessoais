@@ -1,3 +1,5 @@
+import { Starfield } from "./Starfield";
+
 export function GlowBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-bg">
@@ -12,6 +14,7 @@ export function GlowBackground() {
           backgroundSize: "48px 48px",
         }}
       />
+      <Starfield />
     </div>
   );
 }

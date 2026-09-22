@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { AnimatedNumber } from "../components/AnimatedNumber";
 import {
   IconPlus,
   IconSearch,
@@ -12,9 +13,11 @@ import {
   IconTrash,
 } from "../components/icons";
 import { Layout } from "../components/Layout";
+import { Sparkline } from "../components/Sparkline";
 import { listCategories } from "../features/categories/api";
 import type { Category } from "../features/categories/types";
 import { listTags } from "../features/tags/api";
+import type { Transaction, TransactionType } from "../features/transactions/types";
 import {
   categorizeTransaction,
   createTransaction,
@@ -54,6 +57,31 @@ function avatarColor(category: Category | undefined) {
   if (category?.color) return category.color;
   if (!category) return "#64748b";
   return AVATAR_PALETTE[category.id % AVATAR_PALETTE.length];
+}
+
+const SPARK_DAYS = 14;
+
+/** Soma por dia nos últimos SPARK_DAYS dias, pra alimentar a sparkline do
+ * card. Usa as transações já carregadas (respeitando os filtros da tela),
+ * então o mini-gráfico sempre reflete o que está listado abaixo. */
+function dailySeries(transactions: Transaction[], type: TransactionType) {
+  const buckets = new Map<string, number>();
+  const today = new Date();
+
+  for (let i = SPARK_DAYS - 1; i >= 0; i--) {
+    const day = new Date(today);
+    day.setDate(today.getDate() - i);
+    buckets.set(day.toISOString().slice(0, 10), 0);
+  }
+
+  for (const transaction of transactions) {
+    if (transaction.type !== type) continue;
+    const bucket = buckets.get(transaction.date);
+    if (bucket === undefined) continue;
+    buckets.set(transaction.date, bucket + Number(transaction.amount));
+  }
+
+  return Array.from(buckets.values());
 }
 
 const selectClass =
@@ -160,14 +188,34 @@ export function Transactions() {
       .filter((t) => t.type === "expense")
       .reduce((sum, t) => sum + Number(t.amount), 0);
     return [
-      { label: "Receitas", value: income, tone: "text-emerald-400" },
-      { label: "Despesas", value: expense, tone: "text-pink-400" },
-      { label: "Saldo do período", value: income - expense, tone: "text-gradient" },
+      {
+        label: "Receitas",
+        value: income,
+        tone: "text-emerald-400",
+        spark: dailySeries(list, "income"),
+        sparkColor: "#34d399",
+      },
+      {
+        label: "Despesas",
+        value: expense,
+        tone: "text-pink-400",
+        spark: dailySeries(list, "expense"),
+        sparkColor: "#ec4899",
+      },
+      {
+        label: "Saldo do período",
+        value: income - expense,
+        tone: "text-gradient",
+        spark: [],
+        sparkColor: "#22d3ee",
+      },
       {
         label: "Transações",
         value: list.length,
         tone: "text-fg",
         isCount: true,
+        spark: [],
+        sparkColor: "#22d3ee",
       },
     ];
   }, [transactionsQuery.data]);
@@ -198,17 +246,28 @@ export function Transactions() {
             key={s.label}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -3 }}
             transition={{ duration: 0.4, delay: i * 0.06 }}
-            className="glass min-w-0 rounded-2xl p-5"
+            className="glass relative min-w-0 overflow-hidden rounded-2xl p-5 transition-colors hover:border-accent-cyan/25"
           >
             <p className="truncate text-xs font-medium tracking-wide text-fg/40 uppercase">
               {s.label}
             </p>
             <p
-              className={`font-display mt-2 truncate text-xl font-bold sm:text-2xl ${s.tone}`}
+              className={`font-display relative mt-2 truncate text-xl font-bold sm:text-2xl ${s.tone}`}
             >
-              {s.isCount ? s.value : currency.format(s.value)}
+              <AnimatedNumber
+                value={s.value}
+                format={(v) =>
+                  s.isCount ? String(Math.round(v)) : currency.format(v)
+                }
+              />
             </p>
+            <Sparkline
+              points={s.spark}
+              color={s.sparkColor}
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-8 w-full opacity-50"
+            />
           </motion.div>
         ))}
       </div>
@@ -469,7 +528,21 @@ export function Transactions() {
       </div>
 
       {transactionsQuery.isLoading && (
-        <p className="text-fg/40">Carregando transações...</p>
+        <div className="glass overflow-hidden rounded-2xl">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 border-b border-fg/5 px-5 py-3.5 last:border-b-0"
+            >
+              <div className="skeleton h-9 w-9 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <div className="skeleton h-3 w-40 rounded" />
+                <div className="skeleton h-2.5 w-24 rounded" />
+              </div>
+              <div className="skeleton h-3 w-20 rounded" />
+            </div>
+          ))}
+        </div>
       )}
 
       {!transactionsQuery.isLoading && transactions.length === 0 && (
@@ -496,11 +569,16 @@ export function Transactions() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 12 }}
                 transition={{ duration: 0.25, delay: i * 0.02 }}
-                className="group flex flex-col gap-2 border-b border-fg/5 px-5 py-3.5 last:border-b-0 hover:bg-fg/[0.03] sm:flex-row sm:items-center sm:justify-between"
+                className="group relative flex flex-col gap-2 border-b border-fg/5 px-5 py-3.5 last:border-b-0 hover:bg-fg/[0.03] sm:flex-row sm:items-center sm:justify-between"
               >
+                <span
+                  aria-hidden="true"
+                  className="absolute inset-y-0 left-0 w-0 transition-all duration-200 group-hover:w-1"
+                  style={{ backgroundColor: avatarColor(category) }}
+                />
                 <div className="flex min-w-0 items-center gap-3">
                   <div
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-black"
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-black transition-transform duration-200 group-hover:scale-110"
                     style={{ backgroundColor: avatarColor(category) }}
                   >
                     {t.type === "transfer" ? (

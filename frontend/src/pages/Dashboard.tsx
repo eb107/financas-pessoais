@@ -13,6 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { AnimatedNumber } from "../components/AnimatedNumber";
 import { IconSpark } from "../components/icons";
 import { Layout } from "../components/Layout";
 import {
@@ -143,14 +144,22 @@ export function Dashboard() {
             key={s.label}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -3 }}
             transition={{ duration: 0.4, delay: i * 0.06 }}
-            className="glass rounded-2xl p-5"
+            className="glass min-w-0 rounded-2xl p-5 transition-colors hover:border-accent-cyan/25"
           >
-            <p className="text-xs font-medium tracking-wide text-fg/40 uppercase">
+            <p className="truncate text-xs font-medium tracking-wide text-fg/40 uppercase">
               {s.label}
             </p>
-            <p className={`font-display mt-2 text-2xl font-bold ${s.tone}`}>
-              {s.isCount ? s.value : currency.format(s.value)}
+            <p
+              className={`font-display mt-2 truncate text-xl font-bold sm:text-2xl ${s.tone}`}
+            >
+              <AnimatedNumber
+                value={s.value}
+                format={(v) =>
+                  s.isCount ? String(Math.round(v)) : currency.format(v)
+                }
+              />
             </p>
           </motion.div>
         ))}
