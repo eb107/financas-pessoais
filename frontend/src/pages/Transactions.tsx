@@ -15,7 +15,7 @@ import {
 import { Layout } from "../components/Layout";
 import { Sparkline } from "../components/Sparkline";
 import { listCategories } from "../features/categories/api";
-import type { Category } from "../features/categories/types";
+import { categoryColor } from "../features/categories/color";
 import { listTags } from "../features/tags/api";
 import type { Transaction, TransactionType } from "../features/transactions/types";
 import {
@@ -42,22 +42,6 @@ const currency = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
 });
-
-const AVATAR_PALETTE = [
-  "#22d3ee",
-  "#a855f7",
-  "#ec4899",
-  "#34d399",
-  "#fbbf24",
-  "#60a5fa",
-  "#f87171",
-];
-
-function avatarColor(category: Category | undefined) {
-  if (category?.color) return category.color;
-  if (!category) return "#64748b";
-  return AVATAR_PALETTE[category.id % AVATAR_PALETTE.length];
-}
 
 const SPARK_DAYS = 14;
 
@@ -574,12 +558,12 @@ export function Transactions() {
                 <span
                   aria-hidden="true"
                   className="absolute inset-y-0 left-0 w-0 transition-all duration-200 group-hover:w-1"
-                  style={{ backgroundColor: avatarColor(category) }}
+                  style={{ backgroundColor: categoryColor(category) }}
                 />
                 <div className="flex min-w-0 items-center gap-3">
                   <div
                     className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-black transition-transform duration-200 group-hover:scale-110"
-                    style={{ backgroundColor: avatarColor(category) }}
+                    style={{ backgroundColor: categoryColor(category) }}
                   >
                     {t.type === "transfer" ? (
                       <IconSwap className="h-4 w-4" />
